@@ -1,0 +1,12 @@
+{
+    "name": "vertex/vertex",
+    "description": "Vertex PHP Framework",
+    "minimum-stability": "dev",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Marty Lamoureux",
+            "email": "marty@lamoureux-mail.fr"
+        }
+    ]
+}
