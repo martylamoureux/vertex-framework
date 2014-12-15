@@ -68,8 +68,9 @@ class Application {
             return $path;
         }));
 
-        $this->twig->addFunction(new \Twig_SimpleFunction('app', function () use ($this) {
-            return $this;
+        $this->twig->addFunction(new \Twig_SimpleFunction('app', function () {
+            global $app;
+            return $app;
         }));
 
         $this->twig->addFilter(new \Twig_SimpleFilter('dump', function ($var) {
