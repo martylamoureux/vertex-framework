@@ -14,7 +14,7 @@
     },
     "autoload": {
         "psr-4" : {
-            "Vertex\\Vertex\\Framework" : "Framework/"
+            "Vertex\\Vertex\\Framework\\" : "Framework/"
         }
     }
 
