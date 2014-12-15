@@ -52,7 +52,29 @@ class Application {
 	}
 
     public function loadTwig() {
-        $loader = new Twig_Loader_Filesystem(APP_ROOT.'/App/Views');
+        $loader = new \Twig_Loader_Filesystem(APP_ROOT.'/App/Views');
+        $this->twig = new \Twig_Environment($loader, array(
+            'cache' => false,
+        ));
+
+        $this->twig->addFunction(new \Twig_SimpleFunction('asset', function ($path) {
+            return 'public/'.$path;
+        }));
+
+        $this->twig->addFunction(new \Twig_SimpleFunction('path', function ($ctl, $action, $params=[]) {
+            $path = "?".CONTROLLER_ACCESSOR.'='.$ctl.'&'.ACTION_ACCESSOR.'='.$action;
+            foreach ($params as $key => $val)
+                $path .= '&'.$key.'='.$val;
+            return $path;
+        }));
+
+        $this->twig->addFunction(new \Twig_SimpleFunction('app', function () use ($this) {
+            return $this;
+        }));
+
+        $this->twig->addFilter(new \Twig_SimpleFilter('dump', function ($var) {
+            return var_dump($var);
+        }));
     }
 
 	public function __get($attr) {
