@@ -30,8 +30,7 @@ class Controller {
      * @return string Generated view
      */
 	public function view($name, $vars = []) {
-		global $twig;
-		return $twig->render($name, $vars);
+		return $this->app->twig->render($name, $vars);
 	}
 
     /**
