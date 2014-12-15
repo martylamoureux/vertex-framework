@@ -11,6 +11,11 @@
     ],
     "require": {
         "twig/twig": "1.16.*"
+    },
+    "autoload": {
+        "psr-4" : {
+            "Vertex\\Vertex\\Framework" : "Framework/"
+        }
     }
 
 }

@@ -10,6 +10,8 @@ class Application {
 	private $modules = [];
 	private $loadedModules = [];
 
+    public $twig;
+
     /**
      * @var Database
      */
@@ -19,6 +21,7 @@ class Application {
 		$this->loadConfig();
 		$this->forceRequestParameters();
 		$this->loadDatabase();
+        $this->loadTwig();
 	}
 
 	private function loadConfig() {
@@ -47,6 +50,10 @@ class Application {
 			$this->db = null;
 		}
 	}
+
+    public function loadTwig() {
+        $loader = new Twig_Loader_Filesystem(APP_ROOT.'/App/Views');
+    }
 
 	public function __get($attr) {
 		foreach ($this->modules as $name => $class) {
