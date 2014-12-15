@@ -9,16 +9,19 @@ class Application {
 	private $aliases = [];
 	private $modules = [];
 	private $loadedModules = [];
+
+    /**
+     * @var Database
+     */
 	public $db;
 
 	public function __construct() {
 		$this->loadConfig();
 		$this->forceRequestParameters();
 		$this->loadDatabase();
-		$this->loadModules();
 	}
 
-	public function loadConfig() {
+	private function loadConfig() {
 		$this->config = require APP_ROOT."/config/config.php";
 		$this->envs = require APP_ROOT."/config/envs.php";
 
@@ -28,7 +31,7 @@ class Application {
 		}
 	}
 
-	public function forceRequestParameters() {
+    private function forceRequestParameters() {
 		if (!array_key_exists(CONTROLLER_ACCESSOR, $_GET)) {
 			header('Location: ?'.CONTROLLER_ACCESSOR.'='.$this->getConfig('default_controller'));
 		}
@@ -37,19 +40,11 @@ class Application {
 		}
 	}
 
-	public function loadDatabase() {
+    private function loadDatabase() {
 		if ($this->hasConfig('database')) {
 			$this->db = new Database($this);
 		} else {
 			$this->db = null;
-		}
-	}
-
-	public function loadModules() {
-		$modules = require APP_ROOT."/config/modules.php";
-
-		foreach ($modules as $module => $class) {
-			$this->modules[$module] = $class;
 		}
 	}
 
@@ -71,14 +66,15 @@ class Application {
 	}
 
 	public function getConfig($name, $sub = '') {
-		if ($sub == '')
-			return $this->config[$name];
-		else
-			return $this->config[$name][$sub];
+        return $sub == '' ? $this->config[$name] : $this->config[$name][$sub];
 	}
 
 	public function getControllerName() {
-		return (array_key_exists(CONTROLLER_ACCESSOR, $_GET)) ? $_GET[CONTROLLER_ACCESSOR] : $this->getConfig('default_controller');
+        if ((array_key_exists(CONTROLLER_ACCESSOR, $_GET))) {
+            return $_GET[CONTROLLER_ACCESSOR];
+        } else {
+            return $this->getConfig('default_controller');
+        }
 	}
 
 	public function getActionName() {
@@ -125,6 +121,13 @@ class Application {
 		return $this->getConfig('debug');
 	}
 
+    /**
+     *
+     * Stops the execution of the request and raise an error.
+     *
+     * @param Integer $code Response status
+     * @param String $message Error message
+     */
 	public function raise($code, $message) {
 		http_response_code($code);
 		if ($this->isDebug())

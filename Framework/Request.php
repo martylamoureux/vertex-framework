@@ -3,6 +3,10 @@
 namespace Vertex\Vertex\Framework;
 
 class Request {
+
+    /**
+     * @var Application
+     */
 	private $app;
 
 	private $flashbag = [];
@@ -11,10 +15,16 @@ class Request {
 		$this->app = $app;
 	}
 
+    /**
+     * @return Application
+     */
 	public function getApplication() {
 		return $this->app;
 	}
 
+    /**
+     * @return Controller
+     */
 	public function getController() {
 		if (!file_exists(APP_ROOT.'/App/Controllers/'.$this->app->getControllerName().'Controller.php')) {
 			$this->app->raise(404, 	"The controller '".$this->app->getControllerName()."' does not exists !");
@@ -25,6 +35,9 @@ class Request {
 		return $ctl;
 	}
 
+    /**
+     * @return String
+     */
 	public function getResponse() {
 		$ctl = $this->getController();
 		$action = strtolower($this->app->getActionName());
