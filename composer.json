@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "twig/twig": "1.1.16"
+        "twig/twig": "1.16.*"
     }
 
 }
