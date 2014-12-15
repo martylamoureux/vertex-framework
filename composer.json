@@ -8,5 +8,9 @@
             "name": "Marty Lamoureux",
             "email": "marty@lamoureux-mail.fr"
         }
-    ]
+    ],
+    "require": {
+        "twig/twig": "1.1.16"
+    }
+
 }
