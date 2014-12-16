@@ -151,6 +151,12 @@ class Application {
 		return $this->getConfig('debug');
 	}
 
+    public function getMemoryUsage() {
+        $unit=array('b','Kb','MB','GB','TB','PB');
+        $size = memory_get_usage(true);
+        return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
+    }
+
     /**
      *
      * Stops the execution of the request and raise an error.

@@ -2,6 +2,9 @@
 
 namespace Vertex\Vertex\Framework;
 
+/**
+ * @property Application app
+ */
 class Request {
 
     /**

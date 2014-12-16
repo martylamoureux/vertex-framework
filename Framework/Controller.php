@@ -13,7 +13,7 @@ class Controller {
 	protected $app;
 
     /**
-     * @param $request Current request
+     * @param $request Request Current request
      */
 	function __construct($request) {
 		$this->request = $request;
@@ -64,7 +64,8 @@ class Controller {
 		if ($fallback === NULL) {
 			$fallback = function() use ($param) {
 				global $app;
-				$app->raise(500, 'The parameter "'.$param.'" is needed.');
+                /** @var Application $app */
+                $app->raise(500, 'The parameter "'.$param.'" is needed.');
 			};
 		}
 
@@ -79,8 +80,8 @@ class Controller {
      * Tells the controller that a specific parameter is needed for the current action.
      * If the parameter is not passed, the default value will be returned.
      *
-     * @param $param The name of the parameter that needs to be passed
-     * @param $default The default value used if the parameter is not given
+     * @param $param String The name of the parameter that needs to be passed
+     * @param $default String The default value used if the parameter is not given
      * @return string The value of the paramter of the default value
      */
 	public function needsOrDefault($param, $default) {
@@ -94,8 +95,8 @@ class Controller {
      * Tells the controller that a specific parameter is needed for the current action in order to find an entity.
      * If the entity is not found, a 404 error will be raised.
      *
-     * @param $model The name of the model of the entity to get
-     * @param $param The name of the request parameter that contains the primary key
+     * @param $model String The name of the model of the entity to get
+     * @param $param String The name of the request parameter that contains the primary key
      * @return Model
      */
 	public function needsEntity($model, $param) {
@@ -111,8 +112,8 @@ class Controller {
      *
      * Redirect the request
      *
-     * @param $controller Name of the controller
-     * @param $action Name of the action of the controller
+     * @param $controller String Name of the controller
+     * @param $action String Name of the action of the controller
      * @param array $params Parameters of the new request
      * @return string Empty response
      */

@@ -2,8 +2,15 @@
 
 namespace Vertex\Vertex\Framework;
 
+/**
+ * @property mixed id
+ */
 class Model {
+    /**
+     * @var Database
+     */
 	private $db;
+
 	protected $table = NULL;
 	public $idField = 'id';
 
@@ -13,8 +20,9 @@ class Model {
 	protected $exclude = [];
 
 	public function __construct() {
-		global $app;
-		$this->db = $app->db;
+        /** @var Application $app */
+        global $app;
+        $this->db = $app->db;
 		if ($this->table === NULL) {
 			$refl = new \ReflectionClass(get_class($this));
 			$this->table = $app->getConfig('database', 'prefix').strtolower($refl->getShortName()).'s';
@@ -54,6 +62,7 @@ class Model {
 	public function get($attr) {
 		if (array_key_exists($attr, $this->attributes))
 			return $this->attributes[$attr];
+        return NULL;
 	}
 
 	public function __invoke($attr) {
@@ -61,9 +70,8 @@ class Model {
 	}
 
 	public function __get($name) {
-		if (array_key_exists($name, $this->attributes))
-			return $this->attributes[$name];
-	}
+		return $this->get($name);
+    }
 
 	public function __set($name, $val) {
 		$this->attributes[$name] = $val;
@@ -107,7 +115,8 @@ class Model {
 	public function delete() {
 		if ($this->isNew) {
 			global $app;
-			$app->raise(500, "Unable to delete non-persited entity.");
+            /** @var Application $app */
+            $app->raise(500, "Unable to delete non-persited entity.");
 		}
 		return $this->db->success($this->deleteQuery(), ['id'=>$this->id()]);
 
@@ -147,7 +156,7 @@ class Model {
 				$table = $thisModel.'_'.$model;
 		}
 		$qb = new QueryBuilder($table);
-		$items = $qb->where($thisField, $this->id)->get();
+		$items = $qb->where($thisField, $this->id())->get();
 		$ids = [];
 		foreach ($items as $item)
 			$ids[] = $item[$otherField];
@@ -161,7 +170,8 @@ class Model {
 				$otherId = $item[$otherField];
 				unset($item[$thisField]);
 				unset($item[$otherField]);
-				foreach ($entities as $entity) {
+                /** @var Model $entity */
+                foreach ($entities as $entity) {
 					if ($entity->id() == $otherId) {
 						foreach ($item as $key => $val) {
 							$entity->attributes['__rel'][($key)] = ($val);
