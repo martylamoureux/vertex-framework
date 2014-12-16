@@ -1,6 +1,6 @@
 <?php
 
-namespace Vertex\Vertex\Framework;
+namespace Vertex\Vertex\Framework\Modeling;
 
 /**
  * @property mixed id
@@ -183,6 +183,15 @@ class Model {
 		//var_dump($entities);
 		return $entities; 
 	}
+
+    private function schema(ModelSchema $schema) {
+        return $schema;
+    }
+
+    public function getSchema() {
+        $schema = new ModelSchema($this);
+        return schema($schema);
+    }
 
 
 }

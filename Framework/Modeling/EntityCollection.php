@@ -1,6 +1,6 @@
 <?php
 
-namespace Vertex\Vertex\Framework;
+namespace Vertex\Vertex\Framework\Modeling;
 
 class EntityCollection implements \Iterator {
     private $items = [];
@@ -68,5 +68,15 @@ class EntityCollection implements \Iterator {
 
     public function add(Model $entity) {
         $this->items[$entity->id()] = $entity;
+    }
+
+    public function count() {
+        return count($this->items);
+    }
+
+    public function only($id) {
+        if (!array_key_exists($id, $this->items))
+            return NULL;
+        return $this->items[$id];
     }
 }

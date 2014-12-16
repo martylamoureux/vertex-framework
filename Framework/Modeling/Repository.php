@@ -1,6 +1,6 @@
 <?php
 
-namespace Vertex\Vertex\Framework;
+namespace Vertex\Vertex\Framework\Framework\Modeling;
 
 /**
  * Class Repository
