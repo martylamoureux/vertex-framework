@@ -2,7 +2,7 @@
 
 namespace Vertex\Vertex\Framework;
 
-use Vertex\Vertex\Framework\Framework\Modeling\Repository;
+use Vertex\Vertex\Framework\Modeling\Repository;
 
 /**
  * Class Database
