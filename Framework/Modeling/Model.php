@@ -190,7 +190,7 @@ class Model {
 
     public function getSchema() {
         $schema = new ModelSchema($this);
-        return schema($schema);
+        return $this->schema($schema);
     }
 
 
