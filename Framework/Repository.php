@@ -2,7 +2,12 @@
 
 namespace Vertex\Vertex\Framework;
 
+/**
+ * Class Repository
+ * @package Vertex\Vertex\Framework
+ */
 class Repository {
+
 	private $modelName;
 
 	private static $cache = [];
@@ -11,10 +16,16 @@ class Repository {
 		$this->modelName = $modelName;
 	}
 
+    /**
+     * @return string The name of the current model
+     */
 	public function getModelName() {
 		return 'App\\Models\\'.$this->modelName;
 	}
 
+    /**
+     * @return array Return an array of all the entities
+     */
 	public function all() {
 		return $this->query()->get();
 	}
