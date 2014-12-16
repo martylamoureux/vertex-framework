@@ -2,12 +2,25 @@
 
 namespace Vertex\Vertex\Framework;
 
+/**
+ * Class Database
+ * @package Vertex\Vertex\Framework
+ */
 class Database {
 
+    /**
+     * @var \PDO
+     */
 	private $pdo;
+    /**
+     * @var Application
+     */
 	private $app;
 	private $trace = [];
 
+    /**
+     * @param $app Application
+     */
 	public function __construct($app) {
 		$this->app = $app;
 		if ($app->getConfig('database', 'driver') == 'sqlsrv')
@@ -24,6 +37,7 @@ class Database {
 
 	public function execute($statement, $params = []) {
 		$res = [];
+
 		if ($this->app->getConfig('enable_db_caching', true) && array_key_exists($statement, $this->trace))
 			return $this->trace[$statement]['res'];
 		$query = $this->pdo->prepare($statement);

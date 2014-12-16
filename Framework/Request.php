@@ -3,6 +3,8 @@
 namespace Vertex\Vertex\Framework;
 
 /**
+ * Class Request
+ * @package Vertex\Vertex\Framework
  * @property Application app
  */
 class Request {

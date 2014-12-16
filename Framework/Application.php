@@ -2,6 +2,10 @@
 
 namespace Vertex\Vertex\Framework;
 
+/**
+ * Class Application
+ * @package Vertex\Vertex\Framework
+ */
 class Application {
 
 	private $config = [];
@@ -52,6 +56,7 @@ class Application {
 	}
 
     public function loadTwig() {
+
         $loader = new \Twig_Loader_Filesystem(APP_ROOT.'/App/Views');
         $this->twig = new \Twig_Environment($loader, array(
             'cache' => false,
@@ -151,9 +156,9 @@ class Application {
 		return $this->getConfig('debug');
 	}
 
-    public function getMemoryUsage() {
+    public function getMemoryUsage($peak = false) {
         $unit=array('b','Kb','MB','GB','TB','PB');
-        $size = memory_get_usage(true);
+        $size = $peak ? memory_get_peak_usage(true) : memory_get_usage(true);
         return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
     }
 
