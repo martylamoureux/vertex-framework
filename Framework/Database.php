@@ -2,6 +2,8 @@
 
 namespace Vertex\Vertex\Framework;
 
+use Vertex\Vertex\Framework\Framework\Modeling\Repository;
+
 /**
  * Class Database
  * @package Vertex\Vertex\Framework
