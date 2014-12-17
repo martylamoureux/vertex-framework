@@ -184,6 +184,11 @@ class Model {
 		return $entities; 
 	}
 
+    public static function create($modelName) {
+        $className = 'App\\Models\\'.$modelName;
+        return new $className;
+    }
+
     private function schema(ModelSchema $schema) {
         return $schema;
     }

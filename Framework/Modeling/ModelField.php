@@ -11,6 +11,7 @@ namespace Vertex\Vertex\Framework\Modeling;
 
 class ModelField {
     private $name;
+    private $title;
     private $type;
     private $length;
     private $options;
@@ -71,12 +72,33 @@ class ModelField {
         return $this;
     }
 
+    public function hasOption($option) {
+        return array_key_exists($option, $this->options);
+    }
+
     /**
      * @return mixed
      */
     public function getType()
     {
         return $this->type;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * @param mixed $title
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+        return $this;
     }
 
     /**
@@ -90,14 +112,34 @@ class ModelField {
 
     public function nullable() {
         $this->addOption("nullable");
+        return $this;
     }
 
     public function unsigned() {
         $this->addOption('unsigned');
+        return $this;
     }
 
     public function defaultValue($value)
     {
         $this->addOption('default:' . $value);
+        return $this;
+    }
+
+    public function unique() {
+        $this->addOption('unique');
+        return $this;
+    }
+
+    public function onUpdate($action) {
+        if (!$this->hasOption('__fk'))
+            return $this;
+        $this->addOption('onupdate:'.$action);
+    }
+
+    public function onDelete($action) {
+        if (!$this->hasOption('__fk'))
+            return $this;
+        $this->addOption('ondelete:'.$action);
     }
 } 
