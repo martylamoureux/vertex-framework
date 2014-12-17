@@ -14,6 +14,8 @@ class Application {
 	private $modules = [];
 	private $loadedModules = [];
 
+    private $commands = [];
+
     public $twig;
 
     /**
@@ -26,6 +28,7 @@ class Application {
 		$this->forceRequestParameters();
 		$this->loadDatabase();
         $this->loadTwig();
+        $this->loadCommands();
 	}
 
 	private function loadConfig() {
@@ -81,6 +84,11 @@ class Application {
         $this->twig->addFilter(new \Twig_SimpleFilter('dump', function ($var) {
             return var_dump($var);
         }));
+    }
+
+    private function loadCommands()
+    {
+        $this->registerCommand('Vertex\\Vertex\\Commands\\Test');
     }
 
 	public function __get($attr) {
@@ -180,6 +188,23 @@ class Application {
 	public function registerAlias($name, $obj) {
 		$this->aliases[$name] = $obj;
 	}
+
+    public function registerCommand($className) {
+        $this->commands[] = $className;
+    }
+
+    public function runCommand($cmd) {
+        foreach ($this->commands as $commandClassName) {
+            /** @var Command $commandClass */
+            $commandClass = new $commandClassName;
+            if ($commandClass->commandName() == $cmd)
+                $commandClass->run();
+        }
+    }
+
+    public function isCLI() {
+        return (php_sapi_name() == "cli");
+    }
 
 	public function close() {
 		$this->db = null;

@@ -189,7 +189,7 @@ class Model {
         return new $className;
     }
 
-    private function schema(ModelSchema $schema) {
+    protected function schema(ModelSchema $schema) {
         return $schema;
     }
 

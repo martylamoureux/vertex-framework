@@ -84,6 +84,10 @@ class Database {
 		return $this->pdo->lastInsertId();
 	}
 
+    public function getSchema() {
+
+    }
+
 	public function getTrace() {
 		return $this->trace;
 	}

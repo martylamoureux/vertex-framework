@@ -76,6 +76,13 @@ class ModelSchema {
         return $field;
     }
 
+    public function passwordField($name) {
+        $field = new ModelField($name);
+        $field->setType('string')->setLength(255)->addOption('password');
+        $this->fields[] = $field;
+        return $field;
+    }
+
     public function foreingKeyField($modelName, $fieldName = NULL) {
         if ($fieldName === NULL)
             $fieldName = strtolower($modelName).'_id';
