@@ -89,6 +89,11 @@ class Application {
     private function loadCommands()
     {
         $this->registerCommand('\\Vertex\\Vertex\\Framework\\Commands\\Test');
+        if ($this->hasConfig('commands')) {
+            $cmds = $this->getConfig('commands');
+            foreach ($cmds as $cmdClass)
+                $this->registerCommand($cmdClass);
+        }
     }
 
 	public function __get($attr) {
