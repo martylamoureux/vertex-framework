@@ -22,4 +22,9 @@ class Command {
         $this->app = $app;
     }
 
+    public function arg($i) {
+        global $argv;
+        return $argv[2+$i];
+    }
+
 }

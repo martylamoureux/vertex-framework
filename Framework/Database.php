@@ -93,7 +93,7 @@ class Database {
             $schema[$table] = $structure;
         }
 
-        var_dump($schema);
+        return $schema;
     }
 
 	public function getTrace() {
