@@ -17,4 +17,12 @@ class DatabaseCurrent extends Command implements CommandInterface {
     {
         return "schema:current";
     }
+
+    /**
+     * @return String
+     */
+    public function description()
+    {
+        return "Show the current structure of the database";
+    }
 }

@@ -93,6 +93,25 @@ class Database {
             $schema[$table] = $structure;
         }
 
+        $fkQuery = "SELECT i.TABLE_NAME, i.CONSTRAINT_TYPE, i.CONSTRAINT_NAME, k.REFERENCED_TABLE_NAME, k.REFERENCED_COLUMN_NAME, k.COLUMN_NAME
+                    FROM information_schema.TABLE_CONSTRAINTS i
+                    LEFT JOIN information_schema.KEY_COLUMN_USAGE k ON i.CONSTRAINT_NAME = k.CONSTRAINT_NAME
+                    WHERE i.CONSTRAINT_TYPE = 'FOREIGN KEY'
+                    AND i.TABLE_SCHEMA = DATABASE()";
+
+        $fkRes = $this->execute($fkQuery);
+        foreach ($fkRes as $fkRow) {
+            if ($fkRow['CONSTRAINT_TYPE'] == 'FOREIGN KEY') {
+                foreach ($schema[$fkRow['TABLE_NAME']] as $key=>$field) {
+                    //echo $schema[$fkRow['TABLE_NAME']]['Field'].'-';
+                    if ($schema[$fkRow['TABLE_NAME']][$key]['Field'] == $fkRow['COLUMN_NAME']) {
+                        $schema[$fkRow['TABLE_NAME']][$key]['fk_table'] = $fkRow['REFERENCED_TABLE_NAME'];
+                        $schema[$fkRow['TABLE_NAME']][$key]['fk_id'] = $fkRow['REFERENCED_COLUMN_NAME'];
+                    }
+                }
+            }
+        }
+
         return $schema;
     }
 

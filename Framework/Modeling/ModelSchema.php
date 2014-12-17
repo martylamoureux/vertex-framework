@@ -87,8 +87,12 @@ class ModelSchema {
         if ($fieldName === NULL)
             $fieldName = strtolower($modelName).'_id';
 
+        /** @var Model $model */
+        $model = Model::create($modelName);
         $field = new ModelField($fieldName);
-        $field->setType('integer')->unsigned()->addOption('__fk');
+        $field->setType('integer')->unsigned()
+            ->addOption('__fk', $model->getTableName())
+            ->addOption('__fk_id', $model->idField);
         $this->fk[] = $fieldName;
         $this->fields[] = $field;
         return $field;
