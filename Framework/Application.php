@@ -88,7 +88,6 @@ class Application {
 
     private function loadCommands()
     {
-        $this->registerCommand('\\Vertex\\Framework\\Commands\\Test');
         $this->registerCommand('\\Vertex\\Framework\\Commands\\DatabaseCurrent');
         $this->registerCommand('\\Vertex\\Framework\\Commands\\DatabaseUpdate');
         if ($this->hasConfig('commands')) {
