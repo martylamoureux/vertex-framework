@@ -5,6 +5,8 @@ namespace Vertex\Vertex\Framework;
 
 class Command implements CommandInterface {
 
+    protected $app;
+
     public function run()
     {
 
@@ -14,4 +16,17 @@ class Command implements CommandInterface {
     {
 
     }
+
+    public function display($text) {
+        echo $text."\r\n";
+    }
+
+    /**
+     * @param mixed $app
+     */
+    public function setApp($app)
+    {
+        $this->app = $app;
+    }
+
 }

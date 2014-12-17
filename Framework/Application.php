@@ -197,9 +197,13 @@ class Application {
         foreach ($this->commands as $commandClassName) {
             /** @var Command $commandClass */
             $commandClass = new $commandClassName;
-            if ($commandClass->commandName() == $cmd)
+            if ($commandClass->commandName() == $cmd) {
+                $commandClass->setApp($this);
                 $commandClass->run();
+                return;
+            }
         }
+        echo "Not found\r\n";
     }
 
     public function isCLI() {
