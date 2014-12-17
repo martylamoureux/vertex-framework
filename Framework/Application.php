@@ -1,10 +1,10 @@
 <?php 
 
-namespace Vertex\Vertex\Framework;
+namespace Vertex\Framework;
 
 /**
  * Class Application
- * @package Vertex\Vertex\Framework
+ * @package Vertex\Framework
  */
 class Application {
 
@@ -88,8 +88,8 @@ class Application {
 
     private function loadCommands()
     {
-        $this->registerCommand('\\Vertex\\Vertex\\Framework\\Commands\\Test');
-        $this->registerCommand('\\Vertex\\Vertex\\Framework\\Commands\\DatabaseCurrent');
+        $this->registerCommand('\\Vertex\\Framework\\Commands\\Test');
+        $this->registerCommand('\\Vertex\\Framework\\Commands\\DatabaseCurrent');
         if ($this->hasConfig('commands')) {
             $cmds = $this->getConfig('commands');
             foreach ($cmds as $cmdClass)

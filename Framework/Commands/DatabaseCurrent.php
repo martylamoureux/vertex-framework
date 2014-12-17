@@ -1,10 +1,10 @@
 <?php
 
-namespace Vertex\Vertex\Framework\Commands;
+namespace Vertex\Framework\Commands;
 
 
-use Vertex\Vertex\Framework\Command;
-use Vertex\Vertex\Framework\CommandInterface;
+use Vertex\Framework\Command;
+use Vertex\Framework\CommandInterface;
 
 class DatabaseCurrent extends Command implements CommandInterface {
 

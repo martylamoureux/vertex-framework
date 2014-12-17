@@ -6,7 +6,7 @@
  * Time: 17:37
  */
 
-namespace Vertex\Vertex\Framework\Modeling;
+namespace Vertex\Framework\Modeling;
 
 
 class ModelField {

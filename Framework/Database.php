@@ -1,12 +1,12 @@
 <?php
 
-namespace Vertex\Vertex\Framework;
+namespace Vertex\Framework;
 
-use Vertex\Vertex\Framework\Modeling\Repository;
+use Vertex\Framework\Modeling\Repository;
 
 /**
  * Class Database
- * @package Vertex\Vertex\Framework
+ * @package Vertex\Framework
  */
 class Database {
 
@@ -85,8 +85,15 @@ class Database {
 	}
 
     public function getSchema() {
-        $tables = $this->execute("show tables");
-        var_dump($tables);
+        $rawTables = $this->execute("show tables");
+        $schema = [];
+        foreach ($rawTables as $key=>$t) {
+            $table = array_values($t)[0];
+            $structure = $this->execute("describe ".$table);
+            $schema[$table] = $structure;
+        }
+
+        var_dump($schema);
     }
 
 	public function getTrace() {

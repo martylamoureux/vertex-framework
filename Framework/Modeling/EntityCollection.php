@@ -1,6 +1,6 @@
 <?php
 
-namespace Vertex\Vertex\Framework\Modeling;
+namespace Vertex\Framework\Modeling;
 
 class EntityCollection implements \Iterator {
     private $items = [];

@@ -1,10 +1,10 @@
 <?php
 
-namespace Vertex\Vertex\Framework\Modeling;
+namespace Vertex\Framework\Modeling;
 
 /**
  * Class Repository
- * @package Vertex\Vertex\Framework
+ * @package Vertex\Framework
  */
 class Repository {
 

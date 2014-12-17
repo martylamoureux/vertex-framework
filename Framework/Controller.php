@@ -1,6 +1,6 @@
 <?php 
 
-namespace Vertex\Vertex\Framework;
+namespace Vertex\Framework;
 
 class Controller {
     /**

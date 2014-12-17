@@ -1,10 +1,10 @@
 <?php
 
-namespace Vertex\Vertex\Framework;
+namespace Vertex\Framework;
 
 /**
  * Class Input
- * @package Vertex\Vertex\Framework
+ * @package Vertex\Framework
  */
 class Input {
 
