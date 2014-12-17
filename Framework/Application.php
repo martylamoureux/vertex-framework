@@ -200,7 +200,7 @@ class Application {
 
     public function runCommand($cmd) {
         foreach ($this->commands as $commandClassName) {
-            /** @var Command $commandClass */
+            /** @var CommandInterface $commandClass */
             $commandClass = new $commandClassName;
             if ($commandClass->commandName() == $cmd) {
                 $commandClass->setApp($this);

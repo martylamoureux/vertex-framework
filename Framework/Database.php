@@ -85,7 +85,8 @@ class Database {
 	}
 
     public function getSchema() {
-
+        $tables = $this->execute("show tables");
+        var_dump($tables);
     }
 
 	public function getTrace() {

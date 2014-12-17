@@ -3,19 +3,12 @@
 namespace Vertex\Vertex\Framework;
 
 
-class Command implements CommandInterface {
+class Command {
 
+    /**
+     * @var Application
+     */
     protected $app;
-
-    public function run()
-    {
-
-    }
-
-    public function commandName()
-    {
-
-    }
 
     public function display($text) {
         echo $text."\r\n";
