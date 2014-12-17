@@ -89,6 +89,7 @@ class Application {
     private function loadCommands()
     {
         $this->registerCommand('\\Vertex\\Vertex\\Framework\\Commands\\Test');
+        $this->registerCommand('\\Vertex\\Vertex\\Framework\\Commands\\DatabaseCurent');
         if ($this->hasConfig('commands')) {
             $cmds = $this->getConfig('commands');
             foreach ($cmds as $cmdClass)
