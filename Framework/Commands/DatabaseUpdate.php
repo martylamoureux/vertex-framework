@@ -80,21 +80,21 @@ class DatabaseUpdate extends Command implements CommandInterface {
             $ok = 0;
             foreach ($queries as $key => $query) {
                 if (!$this->app->db->success($query)) {
-                    $this->display("An error occured when executing : ");
-                    $this->display(($key + 1) . ".    " . $query);
+                    $this->displayLine("An error occured when executing : ");
+                    $this->displayLine(($key + 1) . ".    " . $query);
                     break;
                 } else
                     $ok++;
             }
-            $this->display("Update finished ");
-            $this->display($ok." queries executed");
+            $this->displayLine("Update finished ");
+            $this->displayLine($ok." queries executed");
         } else {
             if (count($queries) == 0)
-                $this->display("Nothing to update !");
+                $this->displayLine("Nothing to update !");
             else
-                $this->display("These queries will be executed : ");
+                $this->displayLine("These queries will be executed : ");
             foreach ($queries as $key => $query)
-                $this->display(($key + 1) . ".    " . $query);
+                $this->displayLine(($key + 1) . ".    " . $query);
         }
     }
 
