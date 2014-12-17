@@ -90,6 +90,7 @@ class Application {
     {
         $this->registerCommand('\\Vertex\\Framework\\Commands\\Test');
         $this->registerCommand('\\Vertex\\Framework\\Commands\\DatabaseCurrent');
+        $this->registerCommand('\\Vertex\\Framework\\Commands\\DatabaseUpdate');
         if ($this->hasConfig('commands')) {
             $cmds = $this->getConfig('commands');
             foreach ($cmds as $cmdClass)
