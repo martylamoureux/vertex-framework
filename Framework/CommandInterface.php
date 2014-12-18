@@ -30,4 +30,24 @@ interface CommandInterface {
      * @return String
      */
     public function description();
+
+    /**
+     * @return void
+     */
+    public function resetColor();
+
+    /**
+     * @return void
+     */
+    public function parameters();
+
+    /**
+     * @return boolean
+     */
+    public function isUsageCorrect();
+
+    /**
+     * @return void
+     */
+    public function displayUsage();
 } 

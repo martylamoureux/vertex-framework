@@ -185,8 +185,12 @@ class Model {
 	}
 
     public static function create($modelName) {
-        $className = 'App\\Models\\'.$modelName;
+        $className = static::getFullModelName($modelName);
         return new $className;
+    }
+
+    public static function getFullModelName($modelName) {
+        return 'App\\Models\\'.$modelName;
     }
 
     protected function schema(ModelSchema $schema) {

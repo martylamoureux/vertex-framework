@@ -15,18 +15,31 @@ class DatabaseUpdate extends Command implements CommandInterface {
      */
     public function run()
     {
+        $modelName = $this->getParameter('Entity');
+
         $dbStructure = $this->app->db->getSchema();
+
+        if (!class_exists(Model::getFullModelName($modelName))) {
+            $this->stop("The model \"".$modelName."\" does not exists !");
+        }
+
         /** @var Model $model */
-        $model = Model::create($this->arg(0));
+        $model = Model::create($modelName);
         $schema = $model->getSchema();
+        $tableName = $model->getTableName();
 
         $queries = [];
 
-        if (!array_key_exists($model->getTableName(), $dbStructure)) {
-            $queries = $this->createTable($model->getTableName(), $schema);
+        if (!array_key_exists($tableName, $dbStructure)) {
+            $queries = $this->createTable($tableName, $schema);
         } else {
 
-            $structure = $dbStructure[$model->getTableName()];
+            $structure = $dbStructure[$tableName];
+
+            $distFields = [];
+            foreach ($structure as $dbField) {
+                $distFields[$dbField['Field']] = ModelField::fromDatabase($dbField);
+            }
 
             $fieldsToUpdate = [];
 
@@ -43,7 +56,7 @@ class DatabaseUpdate extends Command implements CommandInterface {
                 }
 
                 if (!$found) {
-                    $queries = array_merge($queries, $field->alterationQuery($model->getTableName()));
+                    $queries = array_merge($queries, $field->alterationQuery($tableName));
                 }
             }
 
@@ -58,8 +71,9 @@ class DatabaseUpdate extends Command implements CommandInterface {
                 }
 
                 if (!$found) {
-                    $distField = ModelField::fromDatabase($dbField);
-                    $queries = array_merge($queries, $distField->deletionQuery($model->getTableName()));
+                    /** @var ModelField $distField */
+                    $distField = $distFields[$dbField['Field']];
+                    $queries = array_merge($queries, $distField->deletionQuery($tableName));
                 }
             }
 
@@ -69,10 +83,30 @@ class DatabaseUpdate extends Command implements CommandInterface {
                     if ($dbField['Field'] == $field->getName())
                         break;
                 }
-                $distField = ModelField::fromDatabase($dbField);
-                if (!$field->equals($distField)) {
-                    $queries = array_merge($queries, $field->alterationQuery($model->getTableName(), 'MODIFY'));
-                }
+
+                /** @var ModelField $distField */
+                $distField = $distFields[$dbField['Field']];
+
+                if (!$field->equals($distField))
+                    $queries = array_merge($queries, [$field->alterationQuery($tableName, 'MODIFY')]);
+
+                if ($field->isUnique() && !$distField->isUnique())
+                    $queries = array_merge($queries, [$field->uniqueConstraintQuery($tableName)]);
+
+                if (!$field->isUnique() && $distField->isUnique())
+                    $queries = array_merge($queries, [$field->dropUniqueConstraintQuery($tableName)]);
+
+                if ($field->isForeignKey() && !$distField->isForeignKey())
+                    $queries = array_merge($queries, [$field->foreignConstraintQuery($tableName)]);
+
+                if (!$field->isForeignKey() && $distField->isForeignKey())
+                    $queries = array_merge($queries, [$field->dropForeignConstraintQuery($tableName)]);
+
+                if ($field->isPrimaryKey() && !$distField->isPrimaryKey())
+                    $queries = array_merge($queries, [$field->primaryConstraintQuery($tableName)]);
+
+                if (!$field->isPrimaryKey() && $distField->isPrimaryKey())
+                    $queries = array_merge($queries, [$field->dropPrimaryConstraintQuery($tableName)]);
             }
         }
 
@@ -80,13 +114,17 @@ class DatabaseUpdate extends Command implements CommandInterface {
             $ok = 0;
             foreach ($queries as $key => $query) {
                 if (!$this->app->db->success($query)) {
+                    $this->red();
                     $this->displayLine("An error occured when executing : ");
+                    $this->resetColor();
                     $this->displayLine(($key + 1) . ".    " . $query);
                     break;
                 } else
                     $ok++;
             }
+            $this->green();
             $this->displayLine("Update finished ");
+            $this->resetColor();
             $this->displayLine($ok." queries executed");
         } else {
             if (count($queries) == 0)
@@ -128,5 +166,10 @@ class DatabaseUpdate extends Command implements CommandInterface {
     public function description()
     {
         return "Generate the database structure for an Entity";
+    }
+
+    public function parameters() {
+        $this->declareParameter('Entity', "Name of the entity", false);
+        $this->declareFlag('run', "Execute the changes in the database");
     }
 }

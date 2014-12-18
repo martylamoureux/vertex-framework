@@ -206,6 +206,21 @@ class Application {
             if ($commandClass->commandName() == $cmd) {
                 $commandClass->setApp($this);
                 $commandClass->run();
+                $commandClass->resetColor();
+                return;
+            }
+        }
+        echo "Not found\r\n";
+    }
+
+    public function showCommandHelp($cmd) {
+        foreach ($this->commands as $commandClassName) {
+            /** @var CommandInterface $commandClass */
+            $commandClass = new $commandClassName;
+            if ($commandClass->commandName() == $cmd) {
+                $commandClass->setApp($this);
+                $commandClass->displayUsage();
+                $commandClass->resetColor();
                 return;
             }
         }

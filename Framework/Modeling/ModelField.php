@@ -130,6 +130,8 @@ class ModelField {
     public function getParsedDefault() {
         if ($this->type == 'string')
             return "'".$this->default."'";
+        elseif ($this->type == 'date' && ($this->default == 'NOW()' || $this->default == 'now'))
+            return 'NOW()';
         else
             return $this->default;
     }
@@ -153,6 +155,11 @@ class ModelField {
         return $this;
     }
 
+    public function primaryKey() {
+        $this->addOption('__pk');
+        return $this;
+    }
+
     public function defaultValue($value)
     {
         $this->setDefault($value);
@@ -167,13 +174,25 @@ class ModelField {
     public function onUpdate($action) {
         if (!$this->hasOption('__fk'))
             return $this;
-        $this->addOption('onupdate:'.$action);
+        $this->addOption('onupdate', $action);
     }
 
     public function onDelete($action) {
         if (!$this->hasOption('__fk'))
             return $this;
-        $this->addOption('ondelete:'.$action);
+        $this->addOption('ondelete', $action);
+    }
+
+    public function isUnique() {
+        return $this->hasOption('unique');
+    }
+
+    public function isPrimaryKey() {
+        return $this->hasOption('__pk');
+    }
+
+    public function isForeignKey() {
+        return $this->hasOption('__fk') && $this->hasOption('__fk_id');
     }
 
     public static function fromDatabase($dbField) {
@@ -186,7 +205,11 @@ class ModelField {
         elseif ($type == 'int')
             $type = 'integer';
 
-        $length = str_replace(')', '', $typeParts[1]);
+
+        if (count($typeParts) == 2)
+            $length = str_replace(')', '', $typeParts[1]);
+        else
+            $length = NULL;
         if (strpos($length,'unsigned') !== false) {
             $length = str_replace(' unsigned', '', $length);
             $field->unsigned();
@@ -220,13 +243,12 @@ class ModelField {
         return ($this->getName() == $field->getName() &&
             $this->getType() == $field->getType() &&
             $length &&
-            $this->hasOption('__fk') == $field->hasOption('__fk') &&
             $this->hasOption('unsigned') == $field->hasOption('unsigned') &&
             $this->hasOption('nullable') == $field->hasOption('nullable')
         );
     }
 
-    private function fieldProperties() {
+    public function fieldProperties() {
         $type = $this->type;
         if ($type == 'string')
             $type = "varchar";
@@ -253,7 +275,7 @@ class ModelField {
         $queries = [];
 
         $queries[] = "ALTER TABLE ".$tableName." ".$action." ".$this->name.' '.$this->fieldProperties();
-        if ($this->hasOption('unique'))
+        if ($this->hasOption('unique') && $action == 'ADD')
             $queries[] = $this->uniqueConstraintQuery($tableName);
         if ($this->hasOption('__fk') && $action == 'ADD')
             $queries[] = $this->foreignConstraintQuery($tableName);
@@ -265,11 +287,32 @@ class ModelField {
     }
 
     public function foreignConstraintQuery($tableName) {
-        return "ALTER TABLE ".$tableName." ADD CONSTRAINT fk_".$this->name." FOREIGN KEY (".$this->name.') references '.$this->getOption('__fk').'('.$this->getOption('__fk_id').')';
+        $query = "ALTER TABLE ".$tableName." ADD CONSTRAINT fk_".$this->name." FOREIGN KEY (".$this->name.') references '.$this->getOption('__fk').'('.$this->getOption('__fk_id').')';
+        if ($this->hasOption('onupdate'))
+            $query .= ' ON UPDATE '.$this->getOption('onupdate');
+        if ($this->hasOption('ondelete'))
+            $query .= ' ON DELETE '.$this->getOption('ondelete');
+        return $query;
+    }
+
+    public function dropForeignConstraintQuery($tableName) {
+        return "ALTER TABLE ".$tableName." DROP FOREIGN KEY fk_".$this->name;
     }
 
     public function uniqueConstraintQuery($tableName) {
-        return "ALTER IGNORE TABLE ".$tableName." ADD UNIQUE (".$this->name.')';
+        return "ALTER TABLE ".$tableName." ADD CONSTRAINT ".$this->name."_unique UNIQUE (".$this->name.')';
+    }
+
+    public function dropUniqueConstraintQuery($tableName) {
+        return "ALTER TABLE ".$tableName." DROP INDEX ".$this->name."_unique";
+    }
+
+    public function primaryConstraintQuery($tableName) {
+        return "ALTER TABLE ".$tableName." ADD CONSTRAINT pk_".$this->name." PRIMARY KEY (".$this->name.')';
+    }
+
+    public function dropPrimaryConstraintQuery($tableName) {
+        return "ALTER TABLE ".$tableName." DROP PRIMARY KEY pk_".$this->name;
     }
 
     public function deletionQuery($tableName) {

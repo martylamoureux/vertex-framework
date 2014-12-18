@@ -83,6 +83,13 @@ class ModelSchema {
         return $field;
     }
 
+    public function textField($name) {
+        $field = new ModelField($name);
+        $field->setType('longtext');
+        $this->fields[] = $field;
+        return $field;
+    }
+
     public function foreingKeyField($modelName, $fieldName = NULL) {
         if ($fieldName === NULL)
             $fieldName = strtolower($modelName).'_id';
