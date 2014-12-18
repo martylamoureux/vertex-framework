@@ -60,8 +60,33 @@ class Model {
 	}
 
 	public function get($attr) {
-		if (array_key_exists($attr, $this->attributes))
-			return $this->attributes[$attr];
+        /** @var ModelSchema $schema */
+        $schema = $this->getSchema();
+
+        /** @var ModelField $field */
+        foreach ($schema->fields as $field) {
+            if ($field->getName() == $attr) {
+                if ($field->getType() == 'date' || $field->getType() == 'datetime')
+                    return new \DateTime($this->attributes[$field->getName()]);
+
+                else if ($field->getType() == 'boolean')
+                    return boolval($this->attributes[$field->getName()]);
+
+                else
+                    return $this->attributes[$field->getName()];
+            } else if ($field->isForeignKey() && $field->getOption('__fk_field') == $attr) {
+                return $this->foreignKey($field->getOption('__fk_model'), $field->getName());
+            } else if ($field->isInversedForeignKey() && $field->getOption('__ifk') == $attr) {
+                return $this->inversedForeignKey($field->getOption('__ifk_model'), $field->getOption('__ifk_field'));
+            } else if ($field->isManyToMany() && $field->getOption('__m2m_field') == $attr) {
+                return $this->manyToMany($field->getOption('__m2m_model'), $field->getOption('__m2m'));
+            }
+        }
+
+        foreach ($this->attributes as $key => $value)
+            if ($key == $attr)
+                return $value;
+
         return NULL;
 	}
 
@@ -122,25 +147,18 @@ class Model {
 
 	}
 
-	protected function oneToOne($model, $field = NULL) {
+	protected function foreignKey($model, $field = NULL) {
 		$repo = $this->db->repository($model);
 			if ($field === NULL)
 				$field = strtolower($model).'_id';
 			return $repo->find($this->attributes[$field]);
 	}
 
-	protected function oneToMany($model, $field = NULL) {
+	protected function inversedForeignKey($model, $field = NULL) {
 		$repo = $this->db->repository($model);
 			if ($field === NULL)
 				$field = strtolower($this->getModelName()).'_id';
 			return $repo->query()->where($field, $this->id())->get();
-	}
-
-	protected function manyToOne($model, $field = NULL) {
-		$repo = $this->db->repository($model);
-			if ($field === NULL)
-				$field = strtolower($model).'_id';
-			return $repo->find($this->attributes[$field]);
 	}
 
 	protected function manyToMany($model, $table = NULL, $thisField = NULL, $otherField = NULL) {

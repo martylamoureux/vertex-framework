@@ -195,6 +195,17 @@ class ModelField {
         return $this->hasOption('__fk') && $this->hasOption('__fk_id');
     }
 
+    public function isManyToMany() {
+        return $this->hasOption('__m2m') && $this->hasOption('__m2m_model');
+    }
+    public function isInversedForeignKey() {
+        return $this->hasOption('__ifk') && $this->hasOption('__ifk_field');
+    }
+
+    public function isSkippedInUpdate() {
+        return $this->isManyToMany() || $this->isInversedForeignKey();
+    }
+
     public static function fromDatabase($dbField) {
         $field = new ModelField($dbField['Field']);
         $typeParts = explode('(', $dbField['Type']);
@@ -287,7 +298,7 @@ class ModelField {
     }
 
     public function foreignConstraintQuery($tableName) {
-        $query = "ALTER TABLE ".$tableName." ADD CONSTRAINT fk_".$this->name." FOREIGN KEY (".$this->name.') references '.$this->getOption('__fk').'('.$this->getOption('__fk_id').')';
+        $query = "ALTER TABLE ".$tableName." ADD CONSTRAINT fk_".$tableName.'__'.$this->name." FOREIGN KEY (".$this->name.') references '.$this->getOption('__fk').'('.$this->getOption('__fk_id').')';
         if ($this->hasOption('onupdate'))
             $query .= ' ON UPDATE '.$this->getOption('onupdate');
         if ($this->hasOption('ondelete'))
@@ -296,26 +307,38 @@ class ModelField {
     }
 
     public function dropForeignConstraintQuery($tableName) {
-        return "ALTER TABLE ".$tableName." DROP FOREIGN KEY fk_".$this->name;
+        return "ALTER TABLE ".$tableName." DROP FOREIGN KEY fk_".$tableName.'__'.$this->name;
     }
 
     public function uniqueConstraintQuery($tableName) {
-        return "ALTER TABLE ".$tableName." ADD CONSTRAINT ".$this->name."_unique UNIQUE (".$this->name.')';
+        return "ALTER TABLE ".$tableName." ADD CONSTRAINT ".$tableName.'__'.$this->name."_unique UNIQUE (".$this->name.')';
     }
 
     public function dropUniqueConstraintQuery($tableName) {
-        return "ALTER TABLE ".$tableName." DROP INDEX ".$this->name."_unique";
+        return "ALTER TABLE ".$tableName." DROP INDEX ".$tableName.'__'.$this->name."_unique";
     }
 
     public function primaryConstraintQuery($tableName) {
-        return "ALTER TABLE ".$tableName." ADD CONSTRAINT pk_".$this->name." PRIMARY KEY (".$this->name.')';
+        return "ALTER TABLE ".$tableName." ADD CONSTRAINT pk_".$tableName.'__'.$this->name." PRIMARY KEY (".$this->name.')';
     }
 
     public function dropPrimaryConstraintQuery($tableName) {
-        return "ALTER TABLE ".$tableName." DROP PRIMARY KEY pk_".$this->name;
+        return "ALTER TABLE ".$tableName." DROP PRIMARY KEY pk_".$tableName.'__'.$this->name;
     }
 
     public function deletionQuery($tableName) {
         return ['ALTER TABLE '.$tableName.' DROP COLUMN '.$this->name];
+    }
+
+    /**
+     * @param $sourceModel Model
+     */
+    public function manyToManyTableCreationQuery(Model $sourceModel) {
+        if (!$this->isManyToMany())
+            return NULL;
+        $m2mSchema = new ModelSchema($sourceModel);
+        $m2mSchema->foreignKeyField($sourceModel->getModelName());
+        $m2mSchema->foreignKeyField($this->getOption('__m2m_model'));
+        return $m2mSchema->tableCreationQuery($this->getOption('__m2m'));
     }
 } 

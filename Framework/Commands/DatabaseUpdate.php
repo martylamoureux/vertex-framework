@@ -7,6 +7,7 @@ use Vertex\Framework\Command;
 use Vertex\Framework\CommandInterface;
 use Vertex\Framework\Modeling\Model;
 use Vertex\Framework\Modeling\ModelField;
+use Vertex\Framework\Modeling\ModelSchema;
 
 class DatabaseUpdate extends Command implements CommandInterface {
 
@@ -31,7 +32,7 @@ class DatabaseUpdate extends Command implements CommandInterface {
         $queries = [];
 
         if (!array_key_exists($tableName, $dbStructure)) {
-            $queries = $this->createTable($tableName, $schema);
+            $queries = $schema->tableCreationQuery($tableName);
         } else {
 
             $structure = $dbStructure[$tableName];
@@ -47,20 +48,30 @@ class DatabaseUpdate extends Command implements CommandInterface {
             /** @var ModelField $field */
             foreach ($schema->fields as $field) {
                 $found = false;
-                foreach ($structure as $dbField) {
-                    if ($dbField['Field'] == $field->getName()) {
-                        $fieldsToUpdate[] = $field;
-                        $found = true;
-                        break;
-                    }
-                }
 
-                if (!$found) {
-                    $queries = array_merge($queries, $field->alterationQuery($tableName));
+                if (!$field->isSkippedInUpdate()) {
+                    foreach ($structure as $dbField) {
+                        if ($dbField['Field'] == $field->getName()) {
+                            $fieldsToUpdate[] = $field;
+                            $found = true;
+                            break;
+                        }
+                    }
+
+                    if (!$found) {
+                        $queries = array_merge($queries, $field->alterationQuery($tableName));
+                    }
+                } elseif ($field->isManyToMany()) {
+                    // Search for ManyToMany
+
+                    // Test if relation table exists
+                    if (!array_key_exists($field->getOption('__m2m'), $dbStructure)) {
+                        $queries = array_merge($queries, $field->manyToManyTableCreationQuery($model));
+                    }
                 }
             }
 
-            // Search for field not existing
+            // Search for field not existing in model
             foreach ($structure as $dbField) {
                 $found = false;
                 foreach ($schema->fields as $field) {
@@ -88,7 +99,7 @@ class DatabaseUpdate extends Command implements CommandInterface {
                 $distField = $distFields[$dbField['Field']];
 
                 if (!$field->equals($distField))
-                    $queries = array_merge($queries, [$field->alterationQuery($tableName, 'MODIFY')]);
+                    $queries = array_merge($queries, $field->alterationQuery($tableName, 'MODIFY'));
 
                 if ($field->isUnique() && !$distField->isUnique())
                     $queries = array_merge($queries, [$field->uniqueConstraintQuery($tableName)]);
@@ -109,6 +120,8 @@ class DatabaseUpdate extends Command implements CommandInterface {
                     $queries = array_merge($queries, [$field->dropPrimaryConstraintQuery($tableName)]);
             }
         }
+
+        //var_dump($queries);
 
         if ($this->hasArg('--run')) {
             $ok = 0;
@@ -134,25 +147,6 @@ class DatabaseUpdate extends Command implements CommandInterface {
             foreach ($queries as $key => $query)
                 $this->displayLine(($key + 1) . ".    " . $query);
         }
-    }
-
-    public function createTable($tableName, $schema) {
-        $queries = [];
-        $afterQueries = [];
-        $query = "CREATE TABLE ".$tableName." (";
-        $fields = [];
-        /** @var ModelField $field */
-        foreach ($schema->fields as $field) {
-            $fields[] = $field->tableCreation();
-            if ($field->hasOption('unique'))
-                $afterQueries[] = $field->uniqueConstraintQuery($tableName);
-            if ($field->hasOption('__fk'))
-                $afterQueries[] = $field->foreignConstraintQuery($tableName);
-        }
-        $query .= implode(', ', $fields).')';
-        $queries[] = $query;
-        $queries = array_merge($queries, $afterQueries);
-        return $queries;
     }
 
     public function commandName()
