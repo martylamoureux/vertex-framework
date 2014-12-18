@@ -118,7 +118,7 @@ class Controller {
      * @return string Empty response
      */
 	public function redirect($controller, $action, $params = []) {
-		$path = "?".CONTROLLER_ACCESSOR.'='.$controller.'&'.ACTION_ACCESSOR.'='.$action;
+		$path = "http://".$_SERVER['HTTP_HOST'].dirname(dirname($_SERVER['SCRIPT_NAME']))."/".$controller.'/'.$action;
 		foreach ($params as $key => $val)
 			$path .= '&'.$key.'='.$val;
 		header('Location: '.$path);

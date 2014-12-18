@@ -25,7 +25,6 @@ class Application {
 
 	public function __construct() {
 		$this->loadConfig();
-		$this->forceRequestParameters();
 		$this->loadDatabase();
         $this->loadTwig();
         $this->loadCommands();
@@ -38,15 +37,6 @@ class Application {
 		if (file_exists(APP_ROOT."/config/".$this->currentEnvironment().".php")) {
 			$envConfig = require APP_ROOT."/config/".$this->currentEnvironment().".php";
 			$this->config = array_merge_recursive($this->config, $envConfig);
-		}
-	}
-
-    private function forceRequestParameters() {
-		if (!array_key_exists(CONTROLLER_ACCESSOR, $_GET)) {
-			header('Location: ?'.CONTROLLER_ACCESSOR.'='.$this->getConfig('default_controller'));
-		}
-		if (!array_key_exists(ACTION_ACCESSOR, $_GET)) {
-			header('Location: ?'.CONTROLLER_ACCESSOR.'='.$this->getControllerName().'&'.ACTION_ACCESSOR.'='.$this->getConfig('default_action'));
 		}
 	}
 
@@ -69,10 +59,10 @@ class Application {
             return 'public/'.$path;
         }));
 
-        $this->twig->addFunction(new \Twig_SimpleFunction('path', function ($ctl, $action, $params=[]) {
-            $path = "?".CONTROLLER_ACCESSOR.'='.$ctl.'&'.ACTION_ACCESSOR.'='.$action;
+        $this->twig->addFunction(new \Twig_SimpleFunction('path', function ($controller, $action, $params=[]) {
+            $path = "http://".$_SERVER['HTTP_HOST'].dirname(dirname($_SERVER['SCRIPT_NAME']))."/".$controller.'/'.$action;
             foreach ($params as $key => $val)
-                $path .= '&'.$key.'='.$val;
+                $path .= '/'.$val;
             return $path;
         }));
 
@@ -119,19 +109,37 @@ class Application {
 	}
 
 	public function getControllerName() {
-        if ((array_key_exists(CONTROLLER_ACCESSOR, $_GET))) {
+        /*if ((array_key_exists(CONTROLLER_ACCESSOR, $_GET))) {
             return $_GET[CONTROLLER_ACCESSOR];
         } else {
             return $this->getConfig('default_controller');
-        }
+        }*/
+        if (!array_key_exists('uri', $_GET))
+            return $this->getConfig('default_controller');
+        $url = $_GET['uri'];
+        $urlArray = array();
+        $urlArray = explode("/",$url);
+
+        $controller = $urlArray[0];
+        $controller = ucwords($controller);
+        return $controller;
 	}
 
 	public function getActionName() {
-		return strtolower($_SERVER['REQUEST_METHOD']).ucwords((array_key_exists(ACTION_ACCESSOR, $_GET)) ? $_GET[ACTION_ACCESSOR] : $this->getConfig('default_action'));
+		return strtolower($_SERVER['REQUEST_METHOD']).ucwords($this->getRawActionName());
 	}
 
 	public function getRawActionName() {
-		return strtolower((array_key_exists(ACTION_ACCESSOR, $_GET)) ? $_GET[ACTION_ACCESSOR] : $this->getConfig('default_action'));
+		//return strtolower((array_key_exists(ACTION_ACCESSOR, $_GET)) ? $_GET[ACTION_ACCESSOR] : $this->getConfig('default_action'));
+        if (!array_key_exists('uri', $_GET))
+            return $this->getConfig('default_action');
+        $url = $_GET['uri'];
+        $urlArray = explode("/",$url);
+        array_shift($urlArray);
+        if (count($urlArray) == 0)
+            return $this->getConfig('default_action');
+        $action = $urlArray[0];
+        return $action;
 	}
 
 	public function generateRequest() {
