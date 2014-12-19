@@ -130,8 +130,8 @@ class ModelField {
     public function getParsedDefault() {
         if ($this->type == 'string')
             return "'".$this->default."'";
-        elseif ($this->type == 'date' && ($this->default == 'NOW()' || $this->default == 'now'))
-            return 'NOW()';
+        elseif (($this->type == 'date' || $this->type == 'datetime') && ($this->default == 'NOW()' || $this->default == 'now'))
+            return NULL;
         else
             return $this->default;
     }
@@ -172,13 +172,13 @@ class ModelField {
     }
 
     public function onUpdate($action) {
-        if (!$this->hasOption('__fk'))
+        if (!$this->hasOption('__fk') && !$this->hasOption('__m2m'))
             return $this;
         $this->addOption('onupdate', $action);
     }
 
     public function onDelete($action) {
-        if (!$this->hasOption('__fk'))
+        if (!$this->hasOption('__fk') && !$this->hasOption('__m2m'))
             return $this;
         $this->addOption('ondelete', $action);
     }
@@ -235,7 +235,7 @@ class ModelField {
             $field->addOption('__fk', $dbField['fk_table']);
             $field->addOption('__fk_id', $dbField['fk_id']);
         }
-        if ($dbField['Default'] !== NULL)
+        if ($dbField['Default'] !== NULL && $dbField['Default'] != '')
             $field->defaultValue($dbField['Default']);
         $field->setType($type)->setLength($length);
         return $field;
@@ -254,6 +254,7 @@ class ModelField {
         return ($this->getName() == $field->getName() &&
             $this->getType() == $field->getType() &&
             $length &&
+            $this->getDefault() == $field->getDefault() &&
             $this->hasOption('unsigned') == $field->hasOption('unsigned') &&
             $this->hasOption('nullable') == $field->hasOption('nullable')
         );
@@ -278,7 +279,7 @@ class ModelField {
             $type .= ' primary KEY AUTO_INCREMENT';
 
         $null = (!$this->hasOption('nullable') ? ' NOT NULL' : '');
-        $default = ($this->getDefault() !== NULL ? ' DEFAULT '.$this->getParsedDefault() : '');
+        $default = ($this->getParsedDefault() !== NULL ? ' DEFAULT '.$this->getParsedDefault() : '');
         return $type.$null.$default;
     }
 
@@ -337,8 +338,18 @@ class ModelField {
         if (!$this->isManyToMany())
             return NULL;
         $m2mSchema = new ModelSchema($sourceModel);
-        $m2mSchema->foreignKeyField($sourceModel->getModelName());
-        $m2mSchema->foreignKeyField($this->getOption('__m2m_model'));
+        $fk1 = $m2mSchema->foreignKeyField($sourceModel->getModelName());
+        if ($this->hasOption('onupdate'))
+            $fk1->onUpdate($this->getOption(('onupdate')));
+        if ($this->hasOption('ondelete'))
+            $fk1->onDelete($this->getOption(('ondelete')));
+
+        $fk2 = $m2mSchema->foreignKeyField($this->getOption('__m2m_model'));
+        if ($this->hasOption('onupdate'))
+            $fk2->onUpdate($this->getOption(('onupdate')));
+        if ($this->hasOption('ondelete'))
+            $fk2->onDelete($this->getOption(('ondelete')));
+
         return $m2mSchema->tableCreationQuery($this->getOption('__m2m'));
     }
 } 
