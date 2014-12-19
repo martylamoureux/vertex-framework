@@ -89,6 +89,7 @@ class QueryBuilder {
             /** @var Model $obj */
             $obj = new $this->modelName();
             $obj->hydrate($data);
+            $obj->isNew = false;
             $objs->add($obj);
         }
 
@@ -109,6 +110,7 @@ class QueryBuilder {
 
 		$obj = new $this->modelName();
 		$obj->hydrate($res);
+        $obj->isNew = false;
 		return $obj;
 
 	}
