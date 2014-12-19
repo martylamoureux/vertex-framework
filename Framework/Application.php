@@ -16,6 +16,11 @@ class Application {
 
     private $commands = [];
 
+    public $uri = "";
+    private $controllerName = "";
+    private $actionName = "";
+    private $uriParams = [];
+
     public $twig;
 
     /**
@@ -25,6 +30,7 @@ class Application {
 
 	public function __construct() {
 		$this->loadConfig();
+        $this->loadUri();
 		$this->loadDatabase();
         $this->loadTwig();
         $this->loadCommands();
@@ -48,6 +54,37 @@ class Application {
 		}
 	}
 
+    public function loadUri() {
+        if ($this->isCLI())
+            return;
+        $this->uri = array_key_exists('uri', $_GET) ? $_GET['uri'] : '';
+        $this->uri = rtrim($this->uri, '/');
+
+        // Controller
+        if ($this->uri == '')
+            $this->controllerName = $this->getConfig('default_controller');
+        else {
+            $uri = $this->uri;
+            $urlArray = explode("/", $uri);
+
+            $controller = $urlArray[0];
+            $this->controllerName = ucwords($controller);
+        }
+
+        array_shift($urlArray);
+        if (count($urlArray) == 0)
+            $this->actionName = $this->getConfig('default_action');
+        else {
+            $this->actionName = $urlArray[0];
+            array_shift($urlArray);
+        }
+
+        while (count($urlArray) > 0) {
+            $this->uriParams[] = $urlArray[0];
+            array_shift($urlArray);
+        }
+    }
+
     public function loadTwig() {
 
         $loader = new \Twig_Loader_Filesystem(APP_ROOT.'/App/Views');
@@ -56,7 +93,7 @@ class Application {
         ));
 
         $this->twig->addFunction(new \Twig_SimpleFunction('asset', function ($path) {
-            return 'public/'.$path;
+            return "http://".$_SERVER['HTTP_HOST'].dirname(dirname($_SERVER['SCRIPT_NAME']))."/".$path;
         }));
 
         $this->twig->addFunction(new \Twig_SimpleFunction('path', function ($controller, $action, $params=[]) {
@@ -67,9 +104,10 @@ class Application {
         }));
 
         $this->twig->addFunction(new \Twig_SimpleFunction('app', function () {
-            global $app;
-            return $app;
+            return $this;
         }));
+
+        $this->twig->addGlobal('app', $this);
 
         $this->twig->addFilter(new \Twig_SimpleFilter('dump', function ($var) {
             return var_dump($var);
@@ -109,37 +147,19 @@ class Application {
 	}
 
 	public function getControllerName() {
-        /*if ((array_key_exists(CONTROLLER_ACCESSOR, $_GET))) {
-            return $_GET[CONTROLLER_ACCESSOR];
-        } else {
-            return $this->getConfig('default_controller');
-        }*/
-        if (!array_key_exists('uri', $_GET))
-            return $this->getConfig('default_controller');
-        $url = $_GET['uri'];
-        $urlArray = array();
-        $urlArray = explode("/",$url);
-
-        $controller = $urlArray[0];
-        $controller = ucwords($controller);
-        return $controller;
+        return $this->controllerName;
 	}
 
 	public function getActionName() {
 		return strtolower($_SERVER['REQUEST_METHOD']).ucwords($this->getRawActionName());
 	}
 
+    public function getUriParameter($i) {
+        return array_key_exists($i, $this->uriParams) ? $this->uriParams[$i] : NULL;
+    }
+
 	public function getRawActionName() {
-		//return strtolower((array_key_exists(ACTION_ACCESSOR, $_GET)) ? $_GET[ACTION_ACCESSOR] : $this->getConfig('default_action'));
-        if (!array_key_exists('uri', $_GET))
-            return $this->getConfig('default_action');
-        $url = $_GET['uri'];
-        $urlArray = explode("/",$url);
-        array_shift($urlArray);
-        if (count($urlArray) == 0)
-            return $this->getConfig('default_action');
-        $action = $urlArray[0];
-        return $action;
+        return $this->actionName;
 	}
 
 	public function generateRequest() {
@@ -160,18 +180,6 @@ class Application {
 					$res = $env;
 		}
 		return $res;
-	}
-
-	public static function getUri() {
-		$uri = $_SERVER['REQUEST_URI'];
-		$script = $_SERVER['SCRIPT_NAME'];
-		$script = str_replace('index.php', '', $script);
-		$uri = substr($uri, strlen($script));
-		return '/'.$uri;
-	}
-
-	public static function getUriPart($i) {
-		return explode('/', static::getUri())[$i];
 	}
 
 	public function isDebug() {

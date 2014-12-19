@@ -24,6 +24,11 @@ class Controller {
 		return $this->app->$attr;
 	}
 
+    public function getControllerName($withControllerSufix = true) {
+        $refl = new \ReflectionClass(get_class($this));
+        return $withControllerSufix ? $refl->getShortName() : str_replace('Controller', '', $refl->getShortName());
+    }
+
     /**
      * @param String $name Name of the twig view
      * @param array $vars variables passed to the view
@@ -56,12 +61,12 @@ class Controller {
      * Tells the controller that a specific parameter is needed for the current action.
      * If the parameter is not passed and no fallback closure is passed, the request will send a 500 error.
      *
-     * @param string $param The name of the parameter that needs to be passed
+     * @param int $param The index of the parameter in the uri, following the action name
      * @param mixed $fallback The function that will be called if the param is not needed
      * @return mixed The value of the parameter
      */
 	public function needs($param, $fallback = NULL) {
-		if ($fallback === NULL) {
+		if ($fallback === NULL || !is_callable($fallback)) {
 			$fallback = function() use ($param) {
 				global $app;
                 /** @var Application $app */
@@ -69,10 +74,11 @@ class Controller {
 			};
 		}
 
-		if (!Input::has($param))
-			$fallback();
+        $res = $this->app->getUriParameter($param);
 
-		return Input::get($param);
+		if ($res === NULL)
+			return $fallback();
+		return $res;
 	}
 
     /**
@@ -80,14 +86,12 @@ class Controller {
      * Tells the controller that a specific parameter is needed for the current action.
      * If the parameter is not passed, the default value will be returned.
      *
-     * @param $param String The name of the parameter that needs to be passed
+     * @param $param int The name of the parameter that needs to be passed
      * @param $default String The default value used if the parameter is not given
      * @return string The value of the paramter of the default value
      */
 	public function needsOrDefault($param, $default) {
-		if (!Input::has($param))
-			Input::push($param, $default);
-		return Input::get($param);
+		return $this->needs($param, function() use ($default) { return $default; });
 	}
 
     /**
@@ -96,12 +100,11 @@ class Controller {
      * If the entity is not found, a 404 error will be raised.
      *
      * @param $model String The name of the model of the entity to get
-     * @param $param String The name of the request parameter that contains the primary key
+     * @param $param int The name of the request parameter that contains the primary key
      * @return Model
      */
 	public function needsEntity($model, $param) {
-		$this->needs($param);
-		$id = $this->request->$param;
+		$id = $this->needs($param);
 		$entity = $this->repo($model)->find($id);
 		if ($entity === NULL)
 			$this->app->raise(404, 'The requested '.$model." doesn't exists");
@@ -117,7 +120,11 @@ class Controller {
      * @param array $params Parameters of the new request
      * @return string Empty response
      */
-	public function redirect($controller, $action, $params = []) {
+	public function redirect($controller, $action = NULL, $params = []) {
+        if ($action === NULL) {
+            $action = $controller;
+            $controller = strtolower($this->getControllerName(false));
+        }
 		$path = "http://".$_SERVER['HTTP_HOST'].dirname(dirname($_SERVER['SCRIPT_NAME']))."/".$controller.'/'.$action;
 		foreach ($params as $key => $val)
 			$path .= '&'.$key.'='.$val;
