@@ -98,6 +98,8 @@ class ModelField {
      */
     public function getTitle()
     {
+        if ($this->title === NULL)
+            return $this->name;
         return $this->title;
     }
 

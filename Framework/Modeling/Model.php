@@ -90,7 +90,7 @@ class Model {
                     return boolval($this->attributes[$field->getName()]);
 
                 else
-                    return $this->attributes[$field->getName()];
+                    return array_key_exists($attr, $this->attributes) ? $this->attributes[$field->getName()] : NULL;
             } else if ($field->isForeignKey() && $field->getOption('__fk_field') == $attr) {
                 return $this->foreignKey($field->getOption('__fk_model'), $field->getName());
             } else if ($field->isInversedForeignKey() && $field->getOption('__ifk') == $attr) {
@@ -203,9 +203,11 @@ class Model {
 
 	protected function foreignKey($model, $field = NULL) {
 		$repo = $this->db->repository($model);
-			if ($field === NULL)
-				$field = strtolower($model).'_id';
-			return $repo->find($this->attributes[$field]);
+        if ($field === NULL)
+            $field = strtolower($model).'_id';
+        if (!array_key_exists($field, $this->attributes))
+            return NULL;
+        return $repo->find($this->attributes[$field]);
 	}
 
 	protected function inversedForeignKey($model, $field = NULL) {
@@ -272,6 +274,10 @@ class Model {
     public function getSchema() {
         $schema = new ModelSchema($this);
         return $this->schema($schema);
+    }
+
+    public function getRepository() {
+        return new Repository($this->getModelName());
     }
 
 

@@ -2,6 +2,9 @@
 
 namespace Vertex\Framework;
 
+use Vertex\Framework\Modeling\FormAdapter;
+use Vertex\Framework\Modeling\Model;
+
 class Controller {
     /**
      * @var Request
@@ -55,6 +58,13 @@ class Controller {
 	public function repo($name) {
 		return $this->app->db->repository($name);
 	}
+
+    public function form($model) {
+        if ($model instanceof Model)
+            return new FormAdapter($model);
+        else
+            return new FormAdapter(Model::create($model));
+    }
 
     /**
      *
@@ -125,9 +135,7 @@ class Controller {
             $action = $controller;
             $controller = strtolower($this->getControllerName(false));
         }
-		$path = "http://".$_SERVER['HTTP_HOST'].dirname(dirname($_SERVER['SCRIPT_NAME']))."/".$controller.'/'.$action;
-		foreach ($params as $key => $val)
-			$path .= '&'.$key.'='.$val;
+		$path = $this->app->generateUrl($controller, $action, $params);
 		header('Location: '.$path);
 		return "";
 	}

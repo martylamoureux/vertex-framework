@@ -1,0 +1,12 @@
+<form action="{{ action }}" method="{{ method }}">
+
+    {{ fields|raw }}
+
+    <button class="btn btn-success" type="submit">
+        {% if model.isNew %}
+            {{ app.getConfig('form', 'create_button_label')|raw }}
+        {% else %}
+            {{ app.getConfig('form', 'save_button_label')|raw }}
+        {% endif %}
+    </button>
+</form>

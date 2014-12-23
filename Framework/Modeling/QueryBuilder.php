@@ -75,13 +75,17 @@ class QueryBuilder {
 		return ' ORDER BY '.$res;
 	}
 
-	public function get()
-    {
+    private function rawGet() {
         global $app;
         $query = "SELECT * FROM " . $this->tableName;
         $query .= $this->whereClause();
         $query .= $this->orderClause();
-        $res = $app->db->execute($query, $this->params);
+        return $app->db->execute($query, $this->params);
+    }
+
+	public function get()
+    {
+        $res = $this->rawGet();
         if ($this->modelName == '')
             return $res;
         $objs = new EntityCollection();
@@ -94,6 +98,19 @@ class QueryBuilder {
         }
 
         return $objs;
+    }
+
+    public function getList() {
+        $data = $this->rawGet();
+        $res = [];
+
+        foreach ($data as $row) {
+            $obj = new $this->modelName();
+            $obj->hydrate($row);
+            $obj->isNew = false;
+            $res[$obj->id()] = $obj;
+        }
+        return $res;
     }
 
 	public function first() {

@@ -22,6 +22,7 @@ class Application {
     private $uriParams = [];
 
     public $twig;
+    public $frameworkTwig;
 
     /**
      * @var Database
@@ -87,7 +88,7 @@ class Application {
 
     public function loadTwig() {
 
-        $loader = new \Twig_Loader_Filesystem(APP_ROOT.'/App/Views');
+        $loader = new \Twig_Loader_Filesystem(APP_ROOT . DS . 'App'. DS . 'Views');
         $this->twig = new \Twig_Environment($loader, array(
             'cache' => false,
         ));
@@ -97,10 +98,7 @@ class Application {
         }));
 
         $this->twig->addFunction(new \Twig_SimpleFunction('path', function ($controller, $action, $params=[]) {
-            $path = "http://".$_SERVER['HTTP_HOST'].dirname(dirname($_SERVER['SCRIPT_NAME']))."/".$controller.'/'.$action;
-            foreach ($params as $key => $val)
-                $path .= '/'.$val;
-            return $path;
+            return static::generateUrl($controller, $action, $params);
         }));
 
         $this->twig->addFunction(new \Twig_SimpleFunction('app', function () {
@@ -112,6 +110,17 @@ class Application {
         $this->twig->addFilter(new \Twig_SimpleFilter('dump', function ($var) {
             return var_dump($var);
         }));
+
+        $loader = new \Twig_Loader_Filesystem(realpath(dirname(dirname(__FILE__))) . DS . 'Resources' . DS . 'twig');
+        $this->frameworkTwig = new \Twig_Environment($loader, array(
+            'cache' => false,
+        ));
+
+        $this->frameworkTwig->addFunction(new \Twig_SimpleFunction('path', function ($controller, $action, $params=[]) {
+            return static::generateUrl($controller, $action, $params);
+        }));
+
+        $this->frameworkTwig->addGlobal('app', $this);
     }
 
     private function loadCommands()
@@ -250,5 +259,12 @@ class Application {
 	public function close() {
 		$this->db = null;
 	}
+
+    public static function generateUrl($controller, $action, $params = []) {
+        $url = "http://".$_SERVER['HTTP_HOST'].dirname(dirname($_SERVER['SCRIPT_NAME']))."/".$controller.'/'.$action;
+        foreach ($params as $val)
+            $url .= '/'.$val;
+        return $url;
+    }
 
 }

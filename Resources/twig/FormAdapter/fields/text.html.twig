@@ -1,0 +1,7 @@
+<div class="form-group">
+    <label for="{{ params.id|default(field.name) }}">{{ field.title }}</label>
+    <input type="text" name="{{ field.name }}" id="{{ params.id|default(field.name) }}" class="form-control {{ params.class }}" value="{{ value }}" {{ attributes|raw }} />
+    {% if params.help_text is defined %}
+        <p class="help-block">{{ params.help_text }}</p>
+    {% endif %}
+</div>

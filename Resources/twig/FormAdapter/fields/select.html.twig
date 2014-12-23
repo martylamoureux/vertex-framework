@@ -1,0 +1,13 @@
+<div class="form-group">
+    <label for="{{ params.id|default(field.name) }}">{{ field.title }}</label>
+    <select name="{{ field.name }}" id="{{ params.id|default(field.name) }}" class="form-control {{ params.class }}" {{ attributes|raw }} >
+        {% for key, choice in params.choices %}
+            <option value="{{ key }}" {% if value == key %}selected="selected"{% endif %}>
+                {{ choice }}
+            </option>
+        {% endfor %}
+    </select>
+    {% if params.help_text is defined %}
+        <p class="help-block">{{ params.help_text }}</p>
+    {% endif %}
+</div>
