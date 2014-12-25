@@ -33,6 +33,7 @@ class Application {
 
 	public function __construct() {
 		$this->loadConfig();
+        $this->loadModules();
         $this->loadUri();
 		$this->loadDatabase();
         $this->loadTwig();
@@ -49,6 +50,12 @@ class Application {
 			$this->config = array_merge_recursive($this->config, $envConfig);
 		}
 	}
+
+    private function loadModules() {
+        $file = APP_ROOT . DS . 'config' . DS . 'modules.php';
+        if (file_exists($file))
+            $this->modules = require $file;
+    }
 
     private function loadDatabase() {
 		if ($this->hasConfig('database')) {
@@ -140,6 +147,7 @@ class Application {
     {
         $this->registerCommand('\\Vertex\\Framework\\Commands\\DatabaseCurrent');
         $this->registerCommand('\\Vertex\\Framework\\Commands\\DatabaseUpdate');
+        $this->registerCommand('\\Vertex\\Framework\\Commands\\PublishAssets');
         if ($this->hasConfig('commands')) {
             $cmds = $this->getConfig('commands');
             foreach ($cmds as $cmdClass)
@@ -278,6 +286,17 @@ class Application {
         foreach ($params as $val)
             $url .= '/'.$val;
         return $url;
+    }
+
+    public function stopAndRedirect($controller, $action, $params = []) {
+        if ($action === NULL) {
+            $action = $controller;
+            $controller = $this->getConfig('default_controller');
+        }
+
+        $path = $this->generateUrl($controller, $action, $params);
+        header('Location: '.$path);
+        exit("");
     }
 
 }

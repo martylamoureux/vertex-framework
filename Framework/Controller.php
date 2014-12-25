@@ -135,8 +135,6 @@ class Controller {
             $action = $controller;
             $controller = strtolower($this->getControllerName(false));
         }
-		$path = $this->app->generateUrl($controller, $action, $params);
-		header('Location: '.$path);
-		return "";
+		$this->app->stopAndRedirect($controller, $action, $params);
 	}
 }
