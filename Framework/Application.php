@@ -24,6 +24,8 @@ class Application {
     public $twig;
     public $frameworkTwig;
 
+    public $whoops;
+
     /**
      * @var Database
      */
@@ -34,6 +36,7 @@ class Application {
         $this->loadUri();
 		$this->loadDatabase();
         $this->loadTwig();
+        $this->loadWhoops();
         $this->loadCommands();
 	}
 
@@ -62,9 +65,11 @@ class Application {
         $this->uri = rtrim($this->uri, '/');
 
         // Controller
-        if ($this->uri == '')
+        if ($this->uri == '') {
             $this->controllerName = $this->getConfig('default_controller');
-        else {
+            $this->actionName = $this->getConfig('default_action');
+            return;
+        } else {
             $uri = $this->uri;
             $urlArray = explode("/", $uri);
 
@@ -73,6 +78,7 @@ class Application {
         }
 
         array_shift($urlArray);
+
         if (count($urlArray) == 0)
             $this->actionName = $this->getConfig('default_action');
         else {
@@ -121,6 +127,13 @@ class Application {
         }));
 
         $this->frameworkTwig->addGlobal('app', $this);
+    }
+
+    private function loadWhoops()
+    {
+        $this->whoops = new \Whoops\Run();
+        $this->whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler());
+        $this->whoops->register();
     }
 
     private function loadCommands()
@@ -211,7 +224,7 @@ class Application {
 	public function raise($code, $message) {
 		http_response_code($code);
 		if ($this->isDebug())
-			exit('Error '.$code.'<br/>'.$message);
+			throw new \RuntimeException($message);
 		else
 			exit('Error '.$code);
 	}

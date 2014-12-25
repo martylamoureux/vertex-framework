@@ -10,7 +10,8 @@
         }
     ],
     "require": {
-        "twig/twig": "1.16.*"
+        "twig/twig": "1.16.*",
+        "filp/whoops": "1.*"
     },
     "autoload": {
         "psr-4" : {
