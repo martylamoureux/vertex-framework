@@ -56,6 +56,17 @@ class Command {
         echo $text."\r\n";
     }
 
+    public function copyFile($source, $destination) {
+        return copy($source, $destination);
+    }
+
+    public function createDirectory($path) {
+        if (is_dir($path)) return true;
+        $prev_path = substr($path, 0, strrpos($path, '/', -2) + 1 );
+        $return = $this->createDirectory($prev_path);
+        return ($return && is_writable($prev_path)) ? mkdir($path) : false;
+    }
+
     /**
      * @param mixed $app
      */
