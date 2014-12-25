@@ -4,9 +4,9 @@
 
     <button class="btn btn-success" type="submit">
         {% if model.isNew %}
-            {{ app.getConfig('form', 'create_button_label')|raw }}
+            {{ form.createButtonLabel|raw }}
         {% else %}
-            {{ app.getConfig('form', 'save_button_label')|raw }}
+            {{ form.saveButtonLabel|raw }}
         {% endif %}
     </button>
 </form>

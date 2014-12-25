@@ -24,6 +24,9 @@ class FormAdapter {
     private $formAction = ".";
     private $formMethod = "POST";
 
+    private $createButtonLabel = NULL;
+    private $saveButtonLabel = NULL;
+
     public function __construct(Model $model)
     {
         $this->model = $model;
@@ -141,6 +144,7 @@ class FormAdapter {
             'action'=>$this->formAction,
             'method' => $this->formMethod,
             'model' => $this->model,
+            'form' => $this,
             'fields' => $this->renderFields(),
         ]);
     }
@@ -157,6 +161,52 @@ class FormAdapter {
 
         $this->model->hydrate($attributes, false);
         return $this->model;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCreateButtonLabel()
+    {
+        global $app;
+        if ($this->createButtonLabel === NULL) {
+            if ($app->hasConfig('form', 'create_button_label'))
+                return $this->getConfig('form', 'create_button_label');
+            else
+                return "Create";
+        }
+        return $this->createButtonLabel;
+    }
+
+    /**
+     * @param string $createButtonLabel
+     */
+    public function setCreateButtonLabel($createButtonLabel)
+    {
+        $this->createButtonLabel = $createButtonLabel;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSaveButtonLabel()
+    {
+        global $app;
+        if ($this->createButtonLabel === NULL) {
+            if ($app->hasConfig('form', 'save_button_label'))
+                return $this->getConfig('form', 'save_button_label');
+            else
+                return "Save";
+        }
+        return $this->saveButtonLabel;
+    }
+
+    /**
+     * @param string $saveButtonLabel
+     */
+    public function setSaveButtonLabel($saveButtonLabel)
+    {
+        $this->saveButtonLabel = $saveButtonLabel;
     }
 
 
