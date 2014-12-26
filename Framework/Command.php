@@ -3,7 +3,8 @@
 namespace Vertex\Framework;
 
 
-class Command {
+class Command
+{
 
     /**
      * @var Application
@@ -13,56 +14,73 @@ class Command {
     private $args = [];
     private $nextParamPosition = 0;
 
-    public function commandName() { }
-    public function description() { }
+    public function commandName()
+    {
+    }
 
-    public function display($text) {
+    public function description()
+    {
+    }
+
+    public function display($text)
+    {
         echo $text;
     }
 
-    private function setColor($code) {
-        echo "\033[".$code."m";
+    private function setColor($code)
+    {
+        echo "\033[" . $code . "m";
     }
 
-    public function red() {
+    public function red()
+    {
         $this->setColor(31);
     }
 
-    public function green() {
+    public function green()
+    {
         $this->setColor(32);
     }
 
-    public function yellow() {
+    public function yellow()
+    {
         $this->setColor(33);
     }
 
-    public function blue() {
+    public function blue()
+    {
         $this->setColor(34);
     }
 
-    public function cyan() {
+    public function cyan()
+    {
         $this->setColor(36);
     }
 
-    public function white() {
+    public function white()
+    {
         $this->setColor(37);
     }
 
-    public function resetColor() {
+    public function resetColor()
+    {
         echo "\033[0m";
     }
 
-    public function displayLine($text = "") {
-        echo $text."\r\n";
+    public function displayLine($text = "")
+    {
+        echo $text . "\r\n";
     }
 
-    public function copyFile($source, $destination) {
+    public function copyFile($source, $destination)
+    {
         return copy($source, $destination);
     }
 
-    public function createDirectory($path) {
+    public function createDirectory($path)
+    {
         if (is_dir($path)) return true;
-        $prev_path = substr($path, 0, strrpos($path, '/', -2) + 1 );
+        $prev_path = substr($path, 0, strrpos($path, '/', -2) + 1);
         $return = $this->createDirectory($prev_path);
         return ($return && is_writable($prev_path)) ? mkdir($path) : false;
     }
@@ -77,19 +95,21 @@ class Command {
         $this->parameters();
     }
 
-    public function stop($errorMessage = "") {
+    public function stop($errorMessage = "")
+    {
         $this->displayLine();
         $this->red();
         $this->displayLine(">>> The execution has been stopped by the command");
-        $this->displayLine('    '.$errorMessage);
+        $this->displayLine('    ' . $errorMessage);
         $this->displayLine();
         $this->resetColor();
         exit();
     }
 
-    public function arg($i) {
+    public function arg($i)
+    {
         global $argv;
-        return $argv[2+$i];
+        return $argv[2 + $i];
     }
 
     protected function hasArg($arg)
@@ -98,15 +118,18 @@ class Command {
         return in_array($arg, $argv);
     }
 
-    public function parameters() {
+    public function parameters()
+    {
 
     }
 
-    public function isUsageCorrect() {
+    public function isUsageCorrect()
+    {
 
     }
 
-    public function displayUsage() {
+    public function displayUsage()
+    {
 
         $this->displayLine();
 
@@ -133,26 +156,26 @@ class Command {
                 $maxLength = $len;
         }
 
-        $maxTabs = floor($maxLength/4)+1;
+        $maxTabs = floor($maxLength / 4) + 1;
 
         foreach ($params as $arg)
-            $this->display(" ".$arg['name']);
+            $this->display(" " . $arg['name']);
         foreach ($optionalParams as $arg)
-            $this->display(" [".$arg['name'].']');
+            $this->display(" [" . $arg['name'] . ']');
         foreach ($flags as $arg)
-            $this->display(" [--".$arg['name'].']');
+            $this->display(" [--" . $arg['name'] . ']');
 
         $this->displayLine();
         $this->displayLine();
 
         $this->resetColor();
-        $this->display(" ".$this->description());
+        $this->display(" " . $this->description());
 
         $this->displayLine();
         $this->displayLine();
 
         foreach ($params as $arg) {
-            $nbTabs = $maxTabs - (strlen($arg['name'])/4);
+            $nbTabs = $maxTabs - (strlen($arg['name']) / 4);
             $tabs = "";
             for ($i = 0; $i < $nbTabs; $i++)
                 $tabs .= "\t";
@@ -164,7 +187,7 @@ class Command {
 
         }
         foreach ($optionalParams as $arg) {
-            $nbTabs = $maxTabs - (strlen($arg['name'])/4);
+            $nbTabs = $maxTabs - (strlen($arg['name']) / 4);
             $tabs = "";
             for ($i = 0; $i < $nbTabs; $i++)
                 $tabs .= "\t";
@@ -177,7 +200,7 @@ class Command {
             $this->displayLine();
         }
         foreach ($flags as $arg) {
-            $nbTabs = $maxTabs - ((strlen($arg['name'])+2)/4);
+            $nbTabs = $maxTabs - ((strlen($arg['name']) + 2) / 4);
             $tabs = "";
             for ($i = 0; $i < $nbTabs; $i++)
                 $tabs .= "\t";
@@ -192,7 +215,8 @@ class Command {
 
     }
 
-    protected function declareParameter($paramName, $description, $optional = true) {
+    protected function declareParameter($paramName, $description, $optional = true)
+    {
         $this->args[] = [
             'name' => $paramName,
             'type' => 'parameter',
@@ -203,7 +227,8 @@ class Command {
         $this->nextParamPosition++;
     }
 
-    protected function declareFlag($flagName, $description) {
+    protected function declareFlag($flagName, $description)
+    {
         $this->args[] = [
             'name' => $flagName,
             'type' => 'flag',
@@ -211,7 +236,8 @@ class Command {
         ];
     }
 
-    protected function getParameter($paramName) {
+    protected function getParameter($paramName)
+    {
         foreach ($this->args as $param) {
             if ($param['type'] == 'parameter' && $param['name'] == $paramName) {
                 return $this->arg($param['position']);

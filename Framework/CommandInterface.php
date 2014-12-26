@@ -3,7 +3,8 @@
 namespace Vertex\Framework;
 
 
-interface CommandInterface {
+interface CommandInterface
+{
     /**
      * @return void
      */

@@ -9,7 +9,8 @@
 namespace Vertex\Framework\Modeling;
 
 
-class ModelField {
+class ModelField
+{
     private $name;
     private $title;
     private $type;
@@ -69,17 +70,19 @@ class ModelField {
     /**
      * @param mixed $option
      */
-    public function addOption($option, $val=true)
+    public function addOption($option, $val = true)
     {
         $this->options[$option] = $val;
         return $this;
     }
 
-    public function hasOption($option) {
+    public function hasOption($option)
+    {
         return array_key_exists($option, $this->options);
     }
 
-    public function getOption($option) {
+    public function getOption($option)
+    {
         if (!$this->hasOption($option))
             return NULL;
         return $this->options[$option];
@@ -129,9 +132,10 @@ class ModelField {
         return $this->default;
     }
 
-    public function getParsedDefault() {
+    public function getParsedDefault()
+    {
         if ($this->type == 'string')
-            return "'".$this->default."'";
+            return "'" . $this->default . "'";
         elseif (($this->type == 'date' || $this->type == 'datetime') && ($this->default == 'NOW()' || $this->default == 'now'))
             return NULL;
         else
@@ -147,17 +151,20 @@ class ModelField {
         return $this;
     }
 
-    public function nullable() {
+    public function nullable()
+    {
         $this->addOption("nullable");
         return $this;
     }
 
-    public function unsigned() {
+    public function unsigned()
+    {
         $this->addOption('unsigned');
         return $this;
     }
 
-    public function primaryKey() {
+    public function primaryKey()
+    {
         $this->addOption('__pk');
         return $this;
     }
@@ -168,47 +175,58 @@ class ModelField {
         return $this;
     }
 
-    public function unique() {
+    public function unique()
+    {
         $this->addOption('unique');
         return $this;
     }
 
-    public function onUpdate($action) {
+    public function onUpdate($action)
+    {
         if (!$this->hasOption('__fk') && !$this->hasOption('__m2m'))
             return $this;
         $this->addOption('onupdate', $action);
     }
 
-    public function onDelete($action) {
+    public function onDelete($action)
+    {
         if (!$this->hasOption('__fk') && !$this->hasOption('__m2m'))
             return $this;
         $this->addOption('ondelete', $action);
     }
 
-    public function isUnique() {
+    public function isUnique()
+    {
         return $this->hasOption('unique');
     }
 
-    public function isPrimaryKey() {
+    public function isPrimaryKey()
+    {
         return $this->hasOption('__pk');
     }
 
-    public function isForeignKey() {
+    public function isForeignKey()
+    {
         return $this->hasOption('__fk') && $this->hasOption('__fk_id');
     }
 
-    public function isManyToMany() {
+    public function isManyToMany()
+    {
         return $this->hasOption('__m2m') && $this->hasOption('__m2m_model');
     }
-    public function isInversedForeignKey() {
+
+    public function isInversedForeignKey()
+    {
         return $this->hasOption('__ifk') && $this->hasOption('__ifk_field');
     }
 
-    public function isSkippedInUpdate() {
+    public function isSkippedInUpdate()
+    {
         return $this->isManyToMany() || $this->isInversedForeignKey();
     }
 
-    public static function fromDatabase($dbField) {
+    public static function fromDatabase($dbField)
+    {
         $field = new ModelField($dbField['Field']);
         $typeParts = explode('(', $dbField['Type']);
         $type = $typeParts[0];
@@ -223,7 +241,7 @@ class ModelField {
             $length = str_replace(')', '', $typeParts[1]);
         else
             $length = NULL;
-        if (strpos($length,'unsigned') !== false) {
+        if (strpos($length, 'unsigned') !== false) {
             $length = str_replace(' unsigned', '', $length);
             $field->unsigned();
         }
@@ -247,7 +265,8 @@ class ModelField {
      * @param $field ModelField
      * @return bool
      */
-    public function equals($field) {
+    public function equals($field)
+    {
         if ($this->getLength() === NULL || $field->getLength() === NULL)
             $length = true;
         else
@@ -262,7 +281,8 @@ class ModelField {
         );
     }
 
-    public function fieldProperties() {
+    public function fieldProperties()
+    {
         $type = $this->type;
         if ($type == 'string')
             $type = "varchar";
@@ -272,7 +292,7 @@ class ModelField {
         $type = strtoupper($type);
 
         if ($this->length !== NULL)
-            $type .= '('.$this->length.')';
+            $type .= '(' . $this->length . ')';
 
         if ($this->hasOption('unsigned'))
             $type .= ' UNSIGNED';
@@ -281,14 +301,15 @@ class ModelField {
             $type .= ' primary KEY AUTO_INCREMENT';
 
         $null = (!$this->hasOption('nullable') ? ' NOT NULL' : '');
-        $default = ($this->getParsedDefault() !== NULL ? ' DEFAULT '.$this->getParsedDefault() : '');
-        return $type.$null.$default;
+        $default = ($this->getParsedDefault() !== NULL ? ' DEFAULT ' . $this->getParsedDefault() : '');
+        return $type . $null . $default;
     }
 
-    public function alterationQuery($tableName, $action = 'ADD') {
+    public function alterationQuery($tableName, $action = 'ADD')
+    {
         $queries = [];
 
-        $queries[] = "ALTER TABLE ".$tableName." ".$action." ".$this->name.' '.$this->fieldProperties();
+        $queries[] = "ALTER TABLE " . $tableName . " " . $action . " " . $this->name . ' ' . $this->fieldProperties();
         if ($this->hasOption('unique') && $action == 'ADD')
             $queries[] = $this->uniqueConstraintQuery($tableName);
         if ($this->hasOption('__fk') && $action == 'ADD')
@@ -296,47 +317,56 @@ class ModelField {
         return $queries;
     }
 
-    public function tableCreation() {
-        return $this->name.' '.$this->fieldProperties();
+    public function tableCreation()
+    {
+        return $this->name . ' ' . $this->fieldProperties();
     }
 
-    public function foreignConstraintQuery($tableName) {
-        $query = "ALTER TABLE ".$tableName." ADD CONSTRAINT fk_".$tableName.'__'.$this->name." FOREIGN KEY (".$this->name.') references '.$this->getOption('__fk').'('.$this->getOption('__fk_id').')';
+    public function foreignConstraintQuery($tableName)
+    {
+        $query = "ALTER TABLE " . $tableName . " ADD CONSTRAINT fk_" . $tableName . '__' . $this->name . " FOREIGN KEY (" . $this->name . ') references ' . $this->getOption('__fk') . '(' . $this->getOption('__fk_id') . ')';
         if ($this->hasOption('onupdate'))
-            $query .= ' ON UPDATE '.$this->getOption('onupdate');
+            $query .= ' ON UPDATE ' . $this->getOption('onupdate');
         if ($this->hasOption('ondelete'))
-            $query .= ' ON DELETE '.$this->getOption('ondelete');
+            $query .= ' ON DELETE ' . $this->getOption('ondelete');
         return $query;
     }
 
-    public function dropForeignConstraintQuery($tableName) {
-        return "ALTER TABLE ".$tableName." DROP FOREIGN KEY fk_".$tableName.'__'.$this->name;
+    public function dropForeignConstraintQuery($tableName)
+    {
+        return "ALTER TABLE " . $tableName . " DROP FOREIGN KEY fk_" . $tableName . '__' . $this->name;
     }
 
-    public function uniqueConstraintQuery($tableName) {
-        return "ALTER TABLE ".$tableName." ADD CONSTRAINT ".$tableName.'__'.$this->name."_unique UNIQUE (".$this->name.')';
+    public function uniqueConstraintQuery($tableName)
+    {
+        return "ALTER TABLE " . $tableName . " ADD CONSTRAINT " . $tableName . '__' . $this->name . "_unique UNIQUE (" . $this->name . ')';
     }
 
-    public function dropUniqueConstraintQuery($tableName) {
-        return "ALTER TABLE ".$tableName." DROP INDEX ".$tableName.'__'.$this->name."_unique";
+    public function dropUniqueConstraintQuery($tableName)
+    {
+        return "ALTER TABLE " . $tableName . " DROP INDEX " . $tableName . '__' . $this->name . "_unique";
     }
 
-    public function primaryConstraintQuery($tableName) {
-        return "ALTER TABLE ".$tableName." ADD CONSTRAINT pk_".$tableName.'__'.$this->name." PRIMARY KEY (".$this->name.')';
+    public function primaryConstraintQuery($tableName)
+    {
+        return "ALTER TABLE " . $tableName . " ADD CONSTRAINT pk_" . $tableName . '__' . $this->name . " PRIMARY KEY (" . $this->name . ')';
     }
 
-    public function dropPrimaryConstraintQuery($tableName) {
-        return "ALTER TABLE ".$tableName." DROP PRIMARY KEY pk_".$tableName.'__'.$this->name;
+    public function dropPrimaryConstraintQuery($tableName)
+    {
+        return "ALTER TABLE " . $tableName . " DROP PRIMARY KEY pk_" . $tableName . '__' . $this->name;
     }
 
-    public function deletionQuery($tableName) {
-        return ['ALTER TABLE '.$tableName.' DROP COLUMN '.$this->name];
+    public function deletionQuery($tableName)
+    {
+        return ['ALTER TABLE ' . $tableName . ' DROP COLUMN ' . $this->name];
     }
 
     /**
      * @param $sourceModel Model
      */
-    public function manyToManyTableCreationQuery(Model $sourceModel) {
+    public function manyToManyTableCreationQuery(Model $sourceModel)
+    {
         if (!$this->isManyToMany())
             return NULL;
         $m2mSchema = new ModelSchema($sourceModel);

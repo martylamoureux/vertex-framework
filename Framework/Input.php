@@ -6,9 +6,10 @@ namespace Vertex\Framework;
  * Class Input
  * @package Vertex\Framework
  */
-class Input {
+class Input
+{
 
-	private static $stored = [];
+    private static $stored = [];
 
     /**
      *
@@ -17,9 +18,10 @@ class Input {
      * @param $name String Name of the input
      * @return bool true if the input exists
      */
-    public static function has($name) {
-		return array_key_exists($name, $_REQUEST) || array_key_exists($name, static::$stored);
-	}
+    public static function has($name)
+    {
+        return array_key_exists($name, $_REQUEST) || array_key_exists($name, static::$stored);
+    }
 
     /**
      *
@@ -29,15 +31,16 @@ class Input {
      * @param string $fallback Fallback called if the input doesn't exists
      * @return string the requested input
      */
-    public static function get($name, $fallback = '') {
-		if (array_key_exists($name, $_REQUEST))
-			return $_REQUEST[$name];
-		elseif (array_key_exists($name, static::$stored))
-			return static::$stored[$name];
-		else
-			return $fallback;
+    public static function get($name, $fallback = '')
+    {
+        if (array_key_exists($name, $_REQUEST))
+            return $_REQUEST[$name];
+        elseif (array_key_exists($name, static::$stored))
+            return static::$stored[$name];
+        else
+            return $fallback;
 
-	}
+    }
 
 
     /**
@@ -47,7 +50,8 @@ class Input {
      * @param $name Name of the variable
      * @param $value Value to store
      */
-    public static function push($name, $value) {
-		static::$stored[$name] = $value;
-	}
+    public static function push($name, $value)
+    {
+        static::$stored[$name] = $value;
+    }
 }

@@ -6,7 +6,8 @@ namespace Vertex\Framework\Commands;
 use Vertex\Framework\Command;
 use Vertex\Framework\CommandInterface;
 
-class PublishAssets extends Command implements CommandInterface {
+class PublishAssets extends Command implements CommandInterface
+{
 
     public function run()
     {
@@ -43,13 +44,14 @@ class PublishAssets extends Command implements CommandInterface {
     {
         return "module:publish-assets";
     }
-    
+
     public function description()
     {
         return "Copy the module's assets to the project public folder";
     }
-    
-    public function parameters() {
+
+    public function parameters()
+    {
         $this->declareParameter('Module Alias', "Alias given in modules.php of the module", false);
     }
 }

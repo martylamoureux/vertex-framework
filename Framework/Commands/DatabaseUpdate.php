@@ -7,9 +7,9 @@ use Vertex\Framework\Command;
 use Vertex\Framework\CommandInterface;
 use Vertex\Framework\Modeling\Model;
 use Vertex\Framework\Modeling\ModelField;
-use Vertex\Framework\Modeling\ModelSchema;
 
-class DatabaseUpdate extends Command implements CommandInterface {
+class DatabaseUpdate extends Command implements CommandInterface
+{
 
     /**
      *
@@ -21,7 +21,7 @@ class DatabaseUpdate extends Command implements CommandInterface {
         $dbStructure = $this->app->db->getSchema();
 
         if (!class_exists(Model::getFullModelName($modelName))) {
-            $this->stop("The model \"".$modelName."\" does not exists !");
+            $this->stop("The model \"" . $modelName . "\" does not exists !");
         }
 
         /** @var Model $model */
@@ -138,7 +138,7 @@ class DatabaseUpdate extends Command implements CommandInterface {
             $this->green();
             $this->displayLine("Update finished ");
             $this->resetColor();
-            $this->displayLine($ok." queries executed");
+            $this->displayLine($ok . " queries executed");
         } else {
             if (count($queries) == 0)
                 $this->displayLine("Nothing to update !");
@@ -162,7 +162,8 @@ class DatabaseUpdate extends Command implements CommandInterface {
         return "Generate the database structure for an Entity";
     }
 
-    public function parameters() {
+    public function parameters()
+    {
         $this->declareParameter('Entity', "Name of the entity", false);
         $this->declareFlag('run', "Execute the changes in the database");
     }

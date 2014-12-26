@@ -9,7 +9,8 @@
 namespace Vertex\Framework\Modeling;
 
 
-class ModelSchema {
+class ModelSchema
+{
 
     /**
      * @var Model
@@ -19,56 +20,64 @@ class ModelSchema {
     public $fields;
     public $pk;
 
-    public function __construct(Model $model) {
+    public function __construct(Model $model)
+    {
         $this->model = $model;
         $this->fields = [];
         $this->pk = [];
         $this->fk = [];
     }
 
-    public function stringField($name, $length = 255) {
+    public function stringField($name, $length = 255)
+    {
         $field = new ModelField($name);
         $field->setType('string')->setLength($length);
         $this->fields[] = $field;
         return $field;
     }
 
-    public function integerField($name) {
+    public function integerField($name)
+    {
         $field = new ModelField($name);
         $field->setType('integer');
         $this->fields[] = $field;
         return $field;
     }
 
-    public function floatField($name) {
+    public function floatField($name)
+    {
         $field = new ModelField($name);
         $field->setType('float');
         $this->fields[] = $field;
         return $field;
     }
 
-    public function booleanField($name) {
+    public function booleanField($name)
+    {
         $field = new ModelField($name);
         $field->setType('boolean');
         $this->fields[] = $field;
         return $field;
     }
 
-    public function dateField($name) {
+    public function dateField($name)
+    {
         $field = new ModelField($name);
         $field->setType('date');
         $this->fields[] = $field;
         return $field;
     }
 
-    public function dateTimeField($name) {
+    public function dateTimeField($name)
+    {
         $field = new ModelField($name);
         $field->setType('datetime');
         $this->fields[] = $field;
         return $field;
     }
 
-    public function idField($name = 'id') {
+    public function idField($name = 'id')
+    {
         $field = new ModelField($name);
         $field->setType('integer')->unsigned()->addOption('__pk');
         $this->pk[] = $name;
@@ -76,26 +85,29 @@ class ModelSchema {
         return $field;
     }
 
-    public function passwordField($name) {
+    public function passwordField($name)
+    {
         $field = new ModelField($name);
         $field->setType('string')->setLength(255)->addOption('password');
         $this->fields[] = $field;
         return $field;
     }
 
-    public function textField($name) {
+    public function textField($name)
+    {
         $field = new ModelField($name);
         $field->setType('longtext');
         $this->fields[] = $field;
         return $field;
     }
 
-    public function foreignKeyField($modelName, $fieldName = NULL, $dbFieldName = NULL) {
+    public function foreignKeyField($modelName, $fieldName = NULL, $dbFieldName = NULL)
+    {
         if ($fieldName === NULL)
             $fieldName = strtolower($modelName);
 
         if ($dbFieldName === NULL)
-            $dbFieldName = $fieldName.'_id';
+            $dbFieldName = $fieldName . '_id';
 
         /** @var Model $model */
         $model = Model::create($modelName);
@@ -110,11 +122,12 @@ class ModelSchema {
         return $field;
     }
 
-    public function inversedForeignKey($modelName, $fieldName = NULL, $KeyFieldName = NULL) {
+    public function inversedForeignKey($modelName, $fieldName = NULL, $KeyFieldName = NULL)
+    {
         if ($fieldName === NULL)
             $fieldName = strtolower($modelName);
         if ($KeyFieldName === NULL)
-            $KeyFieldName = $fieldName.'_id';
+            $KeyFieldName = $fieldName . '_id';
 
         /** @var Model $model */
         $model = Model::create($modelName);
@@ -128,7 +141,8 @@ class ModelSchema {
         return $field;
     }
 
-    public function manyToManyField($modelName, $fieldName = NULL, $table = NULL) {
+    public function manyToManyField($modelName, $fieldName = NULL, $table = NULL)
+    {
         if ($fieldName === NULL)
             $fieldName = strtolower($modelName);
 
@@ -154,8 +168,9 @@ class ModelSchema {
         return $field;
     }
 
-    public function tableCreationQuery($tableName) {
-        $query = "CREATE TABLE ".$tableName." (";
+    public function tableCreationQuery($tableName)
+    {
+        $query = "CREATE TABLE " . $tableName . " (";
         $fields = [];
         $afterQueries = [];
         /** @var ModelField $field */
@@ -169,7 +184,7 @@ class ModelSchema {
             if ($field->isManyToMany())
                 $afterQueries = array_merge($afterQueries, $field->manyToManyTableCreationQuery($this->model));
         }
-        $query .= implode(', ', $fields).')';
+        $query .= implode(', ', $fields) . ')';
         return array_merge([$query], $afterQueries);
     }
 

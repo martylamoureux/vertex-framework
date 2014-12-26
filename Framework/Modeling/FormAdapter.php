@@ -7,7 +7,8 @@ namespace Vertex\Framework\Modeling;
 use Vertex\Framework\Application;
 use Vertex\Framework\Input;
 
-class FormAdapter {
+class FormAdapter
+{
 
     /**
      * @var Model
@@ -59,7 +60,8 @@ class FormAdapter {
         return $this->model;
     }
 
-    public function addField($fieldName, $fieldType, $title, $value = NULL, $params = []) {
+    public function addField($fieldName, $fieldType, $title, $value = NULL, $params = [])
+    {
         if (array_key_exists('attributes', $params) && array_key_exists('class', $params['attributes']))
             unset($params['attributes']['class']);
 
@@ -85,7 +87,8 @@ class FormAdapter {
         return $this;
     }
 
-    public function addModelField($fieldName, $params = []) {
+    public function addModelField($fieldName, $params = [])
+    {
         /** @var ModelField $field */
         foreach ($this->schema->fields as $field) {
             if ($field->getName() == $fieldName) {
@@ -120,7 +123,7 @@ class FormAdapter {
                 $attributes .= ' ' . $attr . '="' . $value . '"';
         }
         $value = $field['value'];
-        return $app->frameworkTwig->render('FormAdapter/fields/'.$field['type'].'.html.twig', compact('field','params', 'attributes', 'value'));
+        return $app->frameworkTwig->render('FormAdapter/fields/' . $field['type'] . '.html.twig', compact('field', 'params', 'attributes', 'value'));
     }
 
     public function renderFields()
@@ -136,12 +139,13 @@ class FormAdapter {
         return implode("\r\n", $res);
     }
 
-    public function render() {
+    public function render()
+    {
         /** @var Application $app */
         global $app;
 
         return $app->frameworkTwig->render('FormAdapter/form.html.twig', [
-            'action'=>$this->formAction,
+            'action' => $this->formAction,
             'method' => $this->formMethod,
             'model' => $this->model,
             'form' => $this,
@@ -149,11 +153,13 @@ class FormAdapter {
         ]);
     }
 
-    public function renderFormOpening() {
-        return '<form action="'.$this->formAction.'" method="'.$this->formMethod.'">';
+    public function renderFormOpening()
+    {
+        return '<form action="' . $this->formAction . '" method="' . $this->formMethod . '">';
     }
 
-    public function hydrateModel() {
+    public function hydrateModel()
+    {
         $attributes = [];
         foreach ($this->fields as $field) {
             $attributes[$field['name']] = Input::get($field['name']);
@@ -210,5 +216,4 @@ class FormAdapter {
     }
 
 
-
-} 
+}
