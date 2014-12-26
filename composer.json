@@ -13,6 +13,12 @@
         "twig/twig": "1.16.*",
         "filp/whoops": "1.*"
     },
+    "require-dev": {
+        "phpunit/phpunit": "4.4.*",
+        "phpmd/phpmd": "2.*",
+        "sebastian/phpcpd": "2.0.*@dev",
+        "squizlabs/php_codesniffer": "2.*"
+    },
     "autoload": {
         "psr-4" : {
             "Vertex\\Framework\\" : "Framework/"

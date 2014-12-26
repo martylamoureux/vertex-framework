@@ -1,0 +1,13 @@
+<phpunit colors="false">
+    <testsuites>
+        <testsuite name="Vertex">
+            <directory>./Tests/</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist>
+            <directory>./Framework/</directory>
+        </whitelist>
+    </filter>
+</phpunit>

@@ -1,2 +1,10 @@
 .idea/
 index.php
+composer.phar
+vendor
+composer.lock
+tests/metrics/phpcpd_results.md
+tests/metrics/phpdepend_results.md
+tests/metrics/phpdepend_summary.xml
+tests/metrics/phpmd_results.md
+tests/metrics/tests_results.md
